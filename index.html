@@ -1,0 +1,870 @@
+﻿<!doctype html>
+<html lang="pt-br" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apresentador de Anatomia</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+      color: #fff;
+      overflow: hidden;
+      position: relative;
+      perspective: 1000px;
+    }
+
+    /* Efeitos de luz animados */
+    body::before {
+      content: '';
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(100, 200, 255, 0.15) 0%, transparent 70%);
+      border-radius: 50%;
+      top: -50px;
+      left: 10%;
+      animation: glow 8s ease-in-out infinite;
+      pointer-events: none;
+      filter: blur(40px);
+    }
+
+    body::after {
+      content: '';
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(255, 100, 200, 0.1) 0%, transparent 70%);
+      border-radius: 50%;
+      bottom: -100px;
+      right: 5%;
+      animation: glow 10s ease-in-out infinite reverse;
+      pointer-events: none;
+      filter: blur(60px);
+    }
+
+    @keyframes glow {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(20px, 20px) scale(1.1); }
+    }
+
+    .app-wrapper {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 10;
+    }
+
+    .header {
+      background: rgba(48, 43, 99, 0.6);
+      backdrop-filter: blur(15px);
+      padding: 1.5rem;
+      border-bottom: 2px solid rgba(100, 200, 255, 0.4);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .title {
+      font-size: clamp(1.5rem, 5vw, 2.5rem);
+      font-weight: 700;
+      color: #64b5f6;
+      text-align: center;
+      text-shadow: 0 0 20px rgba(100, 181, 246, 0.5);
+      letter-spacing: 1px;
+    }
+
+    .content {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      overflow: auto;
+      position: relative;
+    }
+
+    .slide-container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(48, 43, 99, 0.4);
+      backdrop-filter: blur(15px);
+      border-radius: 20px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 0 60px rgba(100, 200, 255, 0.1);
+      border: 2px solid rgba(100, 181, 246, 0.3);
+      animation: slideIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transform-style: preserve-3d;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: rotateX(45deg) rotateY(-20deg) scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: rotateX(0) rotateY(0) scale(1);
+      }
+    }
+
+    .slide-image {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 12px;
+      animation: imageZoom 0.6s ease-out;
+      filter: drop-shadow(0 0 30px rgba(100, 181, 246, 0.3));
+    }
+
+    @keyframes imageZoom {
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(100, 200, 255, 0.1) 0%, rgba(255, 100, 200, 0.1) 100%);
+      border-radius: 12px;
+      font-size: clamp(1rem, 4vw, 1.5rem);
+      color: #a0c4ff;
+      text-align: center;
+      padding: 2rem;
+      flex-direction: column;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(1rem, 3vw, 2rem);
+      padding: 1.5rem;
+      background: rgba(48, 43, 99, 0.6);
+      backdrop-filter: blur(15px);
+      border-top: 2px solid rgba(100, 200, 255, 0.4);
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%);
+      color: white;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      padding: clamp(0.6rem, 2vw, 1rem) clamp(1rem, 3vw, 1.8rem);
+      border-radius: 25px;
+      font-size: clamp(0.8rem, 2vw, 1.1rem);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      font-weight: 600;
+      box-shadow: 0 4px 20px rgba(100, 181, 246, 0.5), 0 0 20px rgba(100, 181, 246, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      white-space: nowrap;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: linear-gradient(135deg, #42a5f5 0%, #2196f3 100%);
+      transform: translateY(-8px) scale(1.05);
+      box-shadow: 0 8px 30px rgba(100, 181, 246, 0.7), 0 0 30px rgba(100, 181, 246, 0.4);
+    }
+
+    .btn:active:not(:disabled) {
+      transform: translateY(-3px) scale(1);
+    }
+
+    .btn:disabled {
+      background: rgba(100, 100, 150, 0.4);
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+      opacity: 0.5;
+    }
+
+    .btn-orange {
+      background: linear-gradient(135deg, #ff9800 0%, #ff6f00 100%);
+      box-shadow: 0 4px 20px rgba(255, 152, 0, 0.5), 0 0 20px rgba(255, 152, 0, 0.2);
+    }
+
+    .btn-orange:hover:not(:disabled) {
+      background: linear-gradient(135deg, #ff6f00 0%, #e65100 100%);
+      box-shadow: 0 8px 30px rgba(255, 152, 0, 0.7), 0 0 30px rgba(255, 152, 0, 0.4);
+    }
+
+    .btn-purple {
+      background: linear-gradient(135deg, #b366ff 0%, #7c2ae8 100%);
+      box-shadow: 0 4px 20px rgba(179, 102, 255, 0.5), 0 0 20px rgba(179, 102, 255, 0.2);
+    }
+
+    .btn-purple:hover:not(:disabled) {
+      background: linear-gradient(135deg, #7c2ae8 0%, #5a1aaf 100%);
+      box-shadow: 0 8px 30px rgba(179, 102, 255, 0.7), 0 0 30px rgba(179, 102, 255, 0.4);
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 4px 20px rgba(255, 152, 0, 0.5), 0 0 20px rgba(255, 152, 0, 0.2), 0 0 0 0 rgba(255, 152, 0, 0.7); }
+      70% { box-shadow: 0 4px 20px rgba(255, 152, 0, 0.5), 0 0 20px rgba(255, 152, 0, 0.2), 0 0 0 15px rgba(255, 152, 0, 0); }
+      100% { box-shadow: 0 4px 20px rgba(255, 152, 0, 0.5), 0 0 20px rgba(255, 152, 0, 0.2), 0 0 0 0 rgba(255, 152, 0, 0); }
+    }
+
+    #teste-btn {
+      animation: pulse 2s infinite;
+    }
+
+    .slide-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: rgba(100, 181, 246, 0.15);
+      padding: 0.8rem 1.5rem;
+      border-radius: 20px;
+      border: 2px solid rgba(100, 181, 246, 0.4);
+      min-width: 160px;
+      justify-content: center;
+      backdrop-filter: blur(10px);
+    }
+
+    .slide-number {
+      font-size: clamp(0.9rem, 2vw, 1.3rem);
+      font-weight: 700;
+      color: #ffc107;
+      text-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+    }
+
+    .progress-bar {
+      width: clamp(150px, 20vw, 250px);
+      height: 8px;
+      background: rgba(100, 181, 246, 0.2);
+      border-radius: 10px;
+      overflow: hidden;
+      border: 2px solid rgba(100, 181, 246, 0.4);
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #fbc02d, #ff9800, #fbc02d);
+      background-size: 200% 100%;
+      animation: shimmer 2s infinite;
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    @keyframes shimmer {
+      0%, 100% { background-position: 200% 0; }
+      50% { background-position: -200% 0; }
+    }
+
+    .keyboard-hint {
+      position: absolute;
+      bottom: 1rem;
+      right: 1rem;
+      font-size: 0.75rem;
+      color: #a0c4ff;
+      text-align: right;
+      background: rgba(48, 43, 99, 0.6);
+      backdrop-filter: blur(10px);
+      padding: 0.5rem 1rem;
+      border-radius: 15px;
+      border: 1px solid rgba(100, 181, 246, 0.4);
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: rgba(48, 43, 99, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 2rem;
+      max-width: 500px;
+      max-height: 80%;
+      overflow-y: auto;
+      border: 2px solid rgba(100, 181, 246, 0.5);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #64b5f6;
+      margin-bottom: 1.5rem;
+      text-shadow: 0 0 15px rgba(100, 181, 246, 0.4);
+    }
+
+    .modal-rules {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .modal-rule {
+      background: rgba(100, 181, 246, 0.1);
+      border-left: 4px solid #ff9800;
+      padding: 1rem;
+      border-radius: 8px;
+      color: #e0f2f1;
+      line-height: 1.6;
+    }
+
+    .modal-rule strong {
+      color: #64b5f6;
+    }
+
+    .button-container {
+      position: absolute;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .button-container.slide-1 {
+      bottom: 1.5rem;
+      left: 1.5rem;
+    }
+
+    .button-container.slide-18 {
+      bottom: 1.5rem;
+      left: 1.5rem;
+    }
+
+    /* Painel de Notas */
+    .notes-panel {
+      position: fixed;
+      right: -400px;
+      top: 0;
+      width: 400px;
+      height: 100%;
+      background: rgba(48, 43, 99, 0.98);
+      backdrop-filter: blur(20px);
+      border-left: 2px solid rgba(100, 181, 246, 0.5);
+      box-shadow: -8px 0 32px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      z-index: 500;
+      transition: right 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .notes-panel.active {
+      right: 0;
+    }
+
+    .notes-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem;
+      background: rgba(100, 181, 246, 0.15);
+      border-bottom: 2px solid rgba(100, 181, 246, 0.3);
+    }
+
+    .notes-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #64b5f6;
+      margin: 0;
+      text-shadow: 0 0 10px rgba(100, 181, 246, 0.3);
+    }
+
+    .notes-close-btn {
+      background: rgba(255, 100, 100, 0.3);
+      border: 2px solid rgba(255, 100, 100, 0.5);
+      color: #ff6464;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .notes-close-btn:hover {
+      background: rgba(255, 100, 100, 0.6);
+      transform: scale(1.1);
+    }
+
+    .notes-textarea {
+      flex: 1;
+      padding: 1.5rem;
+      background: rgba(0, 0, 0, 0.3);
+      border: none;
+      color: #e0f2f1;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 1rem;
+      resize: none;
+      outline: none;
+      line-height: 1.6;
+    }
+
+    .notes-textarea::placeholder {
+      color: rgba(224, 242, 241, 0.5);
+    }
+
+    .notes-textarea:focus {
+      background: rgba(100, 181, 246, 0.1);
+      box-shadow: inset 0 0 10px rgba(100, 181, 246, 0.2);
+    }
+
+    .notes-status {
+      padding: 0.8rem 1.5rem;
+      background: rgba(100, 181, 246, 0.1);
+      border-top: 2px solid rgba(100, 181, 246, 0.3);
+      color: #a0c4ff;
+      font-size: 0.85rem;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .notes-status.saved {
+      color: #4ade80;
+      background: rgba(74, 222, 128, 0.1);
+    }
+
+    @media (max-width: 768px) {
+      .controls {
+        gap: 0.8rem;
+      }
+
+      .modal-content {
+        margin: 1rem;
+        max-width: 90%;
+      }
+
+      .button-container {
+        gap: 0.5rem;
+      }
+
+      .notes-panel {
+        width: 100%;
+        right: -100%;
+      }
+    }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div class="app-wrapper">
+   <div class="header">
+    <h1 class="title" id="presentation-title">Aula de Anatomia</h1>
+   </div>
+   <div class="content">
+    <div class="slide-container" id="slide-container">
+     <div class="placeholder">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">
+       📊
+      </div>
+      <div>
+       Carregando slide...
+      </div>
+     </div>
+    </div><!-- Botões Slide 1 -->
+    <div class="button-container slide-1" id="slide-1-buttons" style="display: none;">
+     <button class="btn btn-orange" id="cronograma-btn" onclick="openCronograma()">📅 Cronograma</button> <button class="btn btn-purple" id="normas-btn" onclick="openNormas()">⚖️ Normas Lab</button>
+    </div><!-- Botões Slide 18 -->
+    <div class="button-container slide-18" id="slide-18-buttons" style="display: none;">
+     <button class="btn btn-orange" id="cronograma-btn-18" onclick="openTestePage()">📅 Cronograma</button> <button class="btn btn-purple" id="teste-btn" onclick="openTeste()">🧪 Teste seus Conhecimentos</button>
+    </div>
+    <div class="keyboard-hint">
+     Use ← → ou clique nos botões
+    </div>
+   </div><!-- Modal de Normas -->
+   <div class="modal" id="normas-modal" onclick="closeNormasIfBackdrop(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+     <h2 class="modal-title">⚖️ Normas do Laboratório</h2>
+     <div class="modal-rules">
+      <div class="modal-rule">
+       <strong>1. Segurança:</strong> Use sempre EPI (Equipamento de Proteção Individual) adequado ao entrar no laboratório.
+      </div>
+      <div class="modal-rule">
+       <strong>2. Limpeza:</strong> Mantenha o espaço limpo e organizado. Limpe suas ferramentas após usar.
+      </div>
+      <div class="modal-rule">
+       <strong>3. Respeito:</strong> Respeite os colegas e o professor. Trabalhe em silêncio durante as aulas.
+      </div>
+      <div class="modal-rule">
+       <strong>4. Responsabilidade:</strong> Reporte qualquer dano a equipamentos imediatamente.
+      </div>
+      <div class="modal-rule">
+       <strong>5. Assiduidade:</strong> Chegue no horário e informe faltas previamente quando possível.
+      </div>
+      <div class="modal-rule">
+       <strong>6. Ética e Respeito:</strong> O cadáver deve ser tratado com o máximo respeito. É estritamente proibido o uso de celulares para fotos ou vídeos sem autorização expressa.
+      </div>
+     </div>
+    </div>
+   </div>
+   <div class="controls"><button class="btn" id="prev-btn"> <span>← Anterior</span> </button>
+    <div class="slide-info"><span class="slide-number"><span id="current-slide">1</span> / <span id="total-slides">37</span></span>
+    </div>
+    <div class="progress-bar">
+     <div class="progress-fill" id="progress-fill"></div>
+    </div><button class="btn btn-purple" id="toggle-notes-btn" onclick="toggleNotesPanel()">📝 Notas</button> <button class="btn btn-orange" id="toggle-speech-btn" onclick="toggleAutoSpeech()">🔊 Leitura: OFF</button> <button class="btn" id="download-pdf-btn" onclick="downloadNotesAsPDF()">📥 Baixar PDF</button> <button class="btn" id="next-btn"> <span>Próximo →</span> </button>
+   </div><!-- Painel de Notas -->
+   <div id="notes-panel" class="notes-panel">
+    <div class="notes-header">
+     <h3 class="notes-title">📝 Notas - Slide <span id="notes-slide-number">1</span></h3><button class="notes-close-btn" onclick="toggleNotesPanel()">✕</button>
+    </div><textarea id="notes-textarea" class="notes-textarea" placeholder="Digite suas anotações aqui..."></textarea>
+    <div class="notes-status" id="notes-status">
+     Salvando...
+    </div>
+   </div>
+  </div>
+  <script>
+    let currentSlide = 1;
+    let totalSlides = 37;
+    let config = {
+      presentation_title: 'Aula de Anatomia'
+    };
+    let allNotes = {};
+    let autoSpeechEnabled = false;
+    let saveNotesTimeout;
+
+    const defaultConfig = {
+      presentation_title: 'Aula de Anatomia'
+    };
+
+    // Carregar notas do localStorage
+    function loadNotes() {
+      const saved = localStorage.getItem('anatomia-notes');
+      if (saved) {
+        allNotes = JSON.parse(saved);
+      }
+    }
+
+    // Salvar notas no localStorage
+    function saveNotes() {
+      localStorage.setItem('anatomia-notes', JSON.stringify(allNotes));
+      const statusEl = document.getElementById('notes-status');
+      statusEl.textContent = '✓ Salvo';
+      statusEl.classList.add('saved');
+      setTimeout(() => {
+        statusEl.classList.remove('saved');
+        statusEl.textContent = 'Salvando...';
+      }, 2000);
+    }
+
+    // Abrir/Fechar painel de notas
+    function toggleNotesPanel() {
+      const panel = document.getElementById('notes-panel');
+      panel.classList.toggle('active');
+    }
+
+    // Atualizar textarea quando mudar slide
+    function updateNotesPanel() {
+      const textarea = document.getElementById('notes-textarea');
+      const slideNum = document.getElementById('notes-slide-number');
+      
+      slideNum.textContent = currentSlide;
+      textarea.value = allNotes[currentSlide] || '';
+      textarea.focus();
+    }
+
+    // Salvar nota ao digitar
+    document.addEventListener('DOMContentLoaded', () => {
+      const textarea = document.getElementById('notes-textarea');
+      textarea.addEventListener('input', (e) => {
+        allNotes[currentSlide] = e.target.value;
+        
+        clearTimeout(saveNotesTimeout);
+        saveNotesTimeout = setTimeout(() => {
+          saveNotes();
+        }, 1000);
+      });
+    });
+
+    // Ativar/Desativar leitura automática
+    function toggleAutoSpeech() {
+      autoSpeechEnabled = !autoSpeechEnabled;
+      const btn = document.getElementById('toggle-speech-btn');
+      if (autoSpeechEnabled) {
+        btn.textContent = '🔊 Leitura: ON';
+        btn.style.background = 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)';
+        btn.style.boxShadow = '0 4px 20px rgba(74, 222, 128, 0.5), 0 0 20px rgba(74, 222, 128, 0.2)';
+      } else {
+        btn.textContent = '🔊 Leitura: OFF';
+        btn.style.background = 'linear-gradient(135deg, #ff9800 0%, #ff6f00 100%)';
+        btn.style.boxShadow = '0 4px 20px rgba(255, 152, 0, 0.5), 0 0 20px rgba(255, 152, 0, 0.2)';
+        window.speechSynthesis.cancel();
+      }
+    }
+
+    // Ler notas em voz alta
+    function speakNotes() {
+      if (!autoSpeechEnabled) return;
+      
+      const notes = allNotes[currentSlide] || '';
+      if (!notes.trim()) return;
+
+      window.speechSynthesis.cancel();
+      
+      const utterance = new SpeechSynthesisUtterance(`Slide ${currentSlide}. ${notes}`);
+      utterance.lang = 'pt-BR';
+      utterance.rate = 0.9;
+      utterance.pitch = 1;
+      
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // Baixar notas como PDF
+    function downloadNotesAsPDF() {
+      const hasNotes = Object.values(allNotes).some(note => note.trim());
+      
+      if (!hasNotes) {
+        alert('Nenhuma nota para baixar. Adicione anotações primeiro!');
+        return;
+      }
+
+      let content = `NOTAS DE AULA - ${config.presentation_title}\n`;
+      content += `Data: ${new Date().toLocaleDateString('pt-BR')}\n`;
+      content += '='.repeat(50) + '\n\n';
+
+      for (let i = 1; i <= totalSlides; i++) {
+        if (allNotes[i]) {
+          content += `SLIDE ${i}:\n`;
+          content += allNotes[i] + '\n';
+          content += '-'.repeat(50) + '\n\n';
+        }
+      }
+
+      // Criar blob e baixar
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `notas-anatomia-${new Date().getTime()}.txt`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    async function initElement() {
+      if (!window.elementSdk) return;
+
+      await window.elementSdk.init({
+        defaultConfig,
+        onConfigChange: async (newConfig) => {
+          config = newConfig;
+          document.getElementById('presentation-title').textContent = 
+            config.presentation_title || defaultConfig.presentation_title;
+        },
+        mapToCapabilities: () => ({
+          recolorables: [],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (cfg) => new Map([
+          ['presentation_title', cfg.presentation_title || defaultConfig.presentation_title]
+        ])
+      });
+    }
+
+    function renderSlide() {
+      const container = document.getElementById('slide-container');
+      container.style.opacity = '0';
+      container.style.transition = 'opacity 0.15s ease';
+      
+      setTimeout(() => {
+        container.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = `assets/slide${currentSlide}.jpg`;
+        img.alt = `Slide ${currentSlide}`;
+        img.className = 'slide-image';
+        img.loading = 'lazy';
+        img.onerror = function() {
+          console.error('Imagem não carregada:', this.src);
+          container.innerHTML = `
+            <div class="placeholder">
+              <div style="font-size: 3rem; margin-bottom: 1rem;">📊</div>
+              <div>Slide ${currentSlide}</div>
+              <div style="font-size: 0.9rem; margin-top: 0.5rem; color: #95a5a6;">
+                Imagem não disponível
+              </div>
+            </div>
+          `;
+          container.style.opacity = '1';
+        };
+        img.onload = function() {
+          container.style.opacity = '1';
+          // Ler notas automaticamente se habilitado
+          speakNotes();
+        };
+        container.appendChild(img);
+      }, 150);
+    }
+
+    function updateUI() {
+      document.getElementById('current-slide').textContent = currentSlide;
+      document.getElementById('total-slides').textContent = totalSlides;
+
+      const progress = (currentSlide / totalSlides) * 100;
+      document.getElementById('progress-fill').style.width = progress + '%';
+
+      document.getElementById('prev-btn').disabled = currentSlide === 1;
+      document.getElementById('next-btn').disabled = currentSlide === totalSlides;
+
+      // Mostrar/esconder botões específicos dos slides
+      document.getElementById('slide-1-buttons').style.display = currentSlide === 1 ? 'flex' : 'none';
+      document.getElementById('slide-18-buttons').style.display = currentSlide === 18 ? 'flex' : 'none';
+
+      updateNotesPanel();
+      renderSlide();
+    }
+
+    function openCronograma() {
+      window.open('https://pinheiro767.github.io/Turma-seg-2026/', '_blank', 'noopener,noreferrer');
+    }
+
+    function openTestePage() {
+      window.open('https://pinheiro767.github.io/Inicio-anato-2026/', '_blank', 'noopener,noreferrer');
+    }
+
+    function openTeste() {
+      window.open('https://pinheiro767.github.io/Inicio-anato-2026/', '_blank', 'noopener,noreferrer');
+    }
+
+    function openNormas() {
+      document.getElementById('normas-modal').classList.add('active');
+    }
+
+    function closeNormas() {
+      document.getElementById('normas-modal').classList.remove('active');
+    }
+
+    function closeNormasIfBackdrop(event) {
+      if (event.target.id === 'normas-modal') {
+        closeNormas();
+      }
+    }
+
+    // Fechar modal com ESC
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeNormas();
+      }
+    });
+
+    function nextSlide() {
+      if (currentSlide < totalSlides) {
+        currentSlide++;
+        updateUI();
+      }
+    }
+
+    function previousSlide() {
+      if (currentSlide > 1) {
+        currentSlide--;
+        updateUI();
+      }
+    }
+
+    document.getElementById('prev-btn').addEventListener('click', previousSlide);
+    document.getElementById('next-btn').addEventListener('click', nextSlide);
+
+    // Navegação por teclado
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') nextSlide();
+      if (e.key === 'ArrowLeft') previousSlide();
+    });
+
+    // Inicializar
+    loadNotes();
+    initElement();
+    updateUI();
+
+    // Configuração do Reconhecimento de Voz
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'pt-BR';
+      recognition.continuous = true;
+      recognition.interimResults = false;
+
+      recognition.onresult = (event) => {
+        const command = event.results[event.results.length - 1][0].transcript.toLowerCase();
+        console.log("Comando recebido:", command);
+
+        if (command.includes('próximo') || command.includes('avançar') || command.includes('passar')) {
+          nextSlide();
+        } else if (command.includes('anterior') || command.includes('voltar')) {
+          previousSlide();
+        }
+      };
+
+      recognition.onend = () => {
+        recognition.start();
+      };
+
+      recognition.start();
+      console.log("IA de Voz Ativa: Diga 'Próximo' ou 'Anterior'");
+    } else {
+      console.error("Este navegador não suporta comandos de voz.");
+    }
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d19ec16a49ff8bf',t:'MTc3MTcxNTQ4MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
