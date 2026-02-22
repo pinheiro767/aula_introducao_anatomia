@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="pt-br" class="h-full">
  <head>
   <meta charset="UTF-8">
@@ -387,101 +387,6 @@
       left: 1.5rem;
     }
 
-    /* Painel de Notas */
-    .notes-panel {
-      position: fixed;
-      right: -400px;
-      top: 0;
-      width: 400px;
-      height: 100%;
-      background: rgba(48, 43, 99, 0.98);
-      backdrop-filter: blur(20px);
-      border-left: 2px solid rgba(100, 181, 246, 0.5);
-      box-shadow: -8px 0 32px rgba(0, 0, 0, 0.5);
-      display: flex;
-      flex-direction: column;
-      z-index: 500;
-      transition: right 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    .notes-panel.active {
-      right: 0;
-    }
-
-    .notes-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1.5rem;
-      background: rgba(100, 181, 246, 0.15);
-      border-bottom: 2px solid rgba(100, 181, 246, 0.3);
-    }
-
-    .notes-title {
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: #64b5f6;
-      margin: 0;
-      text-shadow: 0 0 10px rgba(100, 181, 246, 0.3);
-    }
-
-    .notes-close-btn {
-      background: rgba(255, 100, 100, 0.3);
-      border: 2px solid rgba(255, 100, 100, 0.5);
-      color: #ff6464;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 1.2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
-    }
-
-    .notes-close-btn:hover {
-      background: rgba(255, 100, 100, 0.6);
-      transform: scale(1.1);
-    }
-
-    .notes-textarea {
-      flex: 1;
-      padding: 1.5rem;
-      background: rgba(0, 0, 0, 0.3);
-      border: none;
-      color: #e0f2f1;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      font-size: 1rem;
-      resize: none;
-      outline: none;
-      line-height: 1.6;
-    }
-
-    .notes-textarea::placeholder {
-      color: rgba(224, 242, 241, 0.5);
-    }
-
-    .notes-textarea:focus {
-      background: rgba(100, 181, 246, 0.1);
-      box-shadow: inset 0 0 10px rgba(100, 181, 246, 0.2);
-    }
-
-    .notes-status {
-      padding: 0.8rem 1.5rem;
-      background: rgba(100, 181, 246, 0.1);
-      border-top: 2px solid rgba(100, 181, 246, 0.3);
-      color: #a0c4ff;
-      font-size: 0.85rem;
-      text-align: center;
-      transition: all 0.3s ease;
-    }
-
-    .notes-status.saved {
-      color: #4ade80;
-      background: rgba(74, 222, 128, 0.1);
-    }
-
     @media (max-width: 768px) {
       .controls {
         gap: 0.8rem;
@@ -495,15 +400,11 @@
       .button-container {
         gap: 0.5rem;
       }
-
-      .notes-panel {
-        width: 100%;
-        right: -100%;
-      }
     }
   </style>
   <style>body { box-sizing: border-box; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
  </head>
  <body class="h-full">
   <div class="app-wrapper">
@@ -556,31 +457,28 @@
      </div>
     </div>
    </div>
-   <div class="controls"><button class="btn" id="prev-btn"> <span>← Anterior</span> </button>
+   <div class="controls"><button class="btn" id="prev-btn"> <span>← Anterior</span> </button> <button class="btn" id="speech-btn" onclick="toggleSpeech()"> <span>🔊 Leitura: OFF</span> </button> <button class="btn btn-purple" id="voice-btn" onclick="toggleVoiceRecognition()"> <span>🎤 Voz: OFF</span> </button> <button class="btn btn-orange" id="notes-btn" onclick="toggleNotes()"> <span>📝 Notas</span> </button>
     <div class="slide-info"><span class="slide-number"><span id="current-slide">1</span> / <span id="total-slides">37</span></span>
     </div>
     <div class="progress-bar">
      <div class="progress-fill" id="progress-fill"></div>
-    </div><button class="btn btn-purple" id="toggle-notes-btn" onclick="toggleNotesPanel()">📝 Notas</button> <button class="btn btn-orange" id="toggle-speech-btn" onclick="toggleAutoSpeech()">🔊 Leitura: OFF</button> <button class="btn" id="download-pdf-btn" onclick="downloadNotesAsPDF()">📥 Baixar PDF</button> <button class="btn" id="next-btn"> <span>Próximo →</span> </button>
+    </div><button class="btn" id="next-btn"> <span>Próximo →</span> </button>
    </div><!-- Painel de Notas -->
-   <div id="notes-panel" class="notes-panel">
-    <div class="notes-header">
-     <h3 class="notes-title">📝 Notas - Slide <span id="notes-slide-number">1</span></h3><button class="notes-close-btn" onclick="toggleNotesPanel()">✕</button>
-    </div><textarea id="notes-textarea" class="notes-textarea" placeholder="Digite suas anotações aqui..."></textarea>
-    <div class="notes-status" id="notes-status">
-     Salvando...
-    </div>
+   <div id="notes-panel" style="display: none; position: fixed; right: 0; top: 0; width: 400px; height: 100%; background: rgba(179, 102, 255, 0.95); backdrop-filter: blur(20px); flex-direction: column; border-left: 2px solid rgba(100, 181, 246, 0.5); box-shadow: -8px 0 32px rgba(0, 0, 0, 0.5); z-index: 999; padding: 1.5rem; gap: 1rem; font-size: 0.9rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+     <h3 style="color: #64b5f6; font-size: 1.3rem; margin: 0;">📝 Notas - Slide <span id="notes-slide-number">1</span></h3><button onclick="toggleNotes()" style="background: rgba(100, 181, 246, 0.3); border: 1px solid rgba(100, 181, 246, 0.5); color: #64b5f6; padding: 0.3rem 0.6rem; border-radius: 50%; cursor: pointer; font-size: 1.2rem;">✕</button>
+    </div><textarea id="notes-textarea" placeholder="Digite suas notas aqui..." style="flex: 1; background: rgba(48, 43, 99, 0.6); border: 2px solid rgba(100, 181, 246, 0.4); color: #fff; padding: 1rem; border-radius: 12px; font-family: monospace; font-size: 0.85rem; resize: none;" onchange="allNotes[currentSlide] = this.value; saveNotes();" oninput="allNotes[currentSlide] = this.value; saveNotes();"></textarea> <button class="btn btn-orange" id="ocr-btn" onclick="extrairTextoDoSlide()" style="width: 100%;"> 🤖 IA: Extrair Texto </button>
+    <div id="ocr-status" style="text-align: center; color: #64b5f6; font-size: 0.75rem; min-height: 1rem;"></div><button class="btn" id="download-btn" onclick="downloadPDF()" style="width: 100%;"> 📥 Baixar Notas </button>
    </div>
-  </div>
-  <script>
+   <script>
     let currentSlide = 1;
     let totalSlides = 37;
+    let allNotes = {};
+    let autoSpeechEnabled = false;
+    let voiceEnabled = false;
     let config = {
       presentation_title: 'Aula de Anatomia'
     };
-    let allNotes = {};
-    let autoSpeechEnabled = false;
-    let saveNotesTimeout;
 
     const defaultConfig = {
       presentation_title: 'Aula de Anatomia'
@@ -588,7 +486,7 @@
 
     // Carregar notas do localStorage
     function loadNotes() {
-      const saved = localStorage.getItem('anatomia-notes');
+      const saved = localStorage.getItem('anatomyNotes');
       if (saved) {
         allNotes = JSON.parse(saved);
       }
@@ -596,109 +494,110 @@
 
     // Salvar notas no localStorage
     function saveNotes() {
-      localStorage.setItem('anatomia-notes', JSON.stringify(allNotes));
-      const statusEl = document.getElementById('notes-status');
-      statusEl.textContent = '✓ Salvo';
-      statusEl.classList.add('saved');
-      setTimeout(() => {
-        statusEl.classList.remove('saved');
-        statusEl.textContent = 'Salvando...';
-      }, 2000);
+      localStorage.setItem('anatomyNotes', JSON.stringify(allNotes));
     }
 
-    // Abrir/Fechar painel de notas
-    function toggleNotesPanel() {
-      const panel = document.getElementById('notes-panel');
-      panel.classList.toggle('active');
-    }
-
-    // Atualizar textarea quando mudar slide
-    function updateNotesPanel() {
-      const textarea = document.getElementById('notes-textarea');
-      const slideNum = document.getElementById('notes-slide-number');
-      
-      slideNum.textContent = currentSlide;
-      textarea.value = allNotes[currentSlide] || '';
-      textarea.focus();
-    }
-
-    // Salvar nota ao digitar
-    document.addEventListener('DOMContentLoaded', () => {
-      const textarea = document.getElementById('notes-textarea');
-      textarea.addEventListener('input', (e) => {
-        allNotes[currentSlide] = e.target.value;
-        
-        clearTimeout(saveNotesTimeout);
-        saveNotesTimeout = setTimeout(() => {
-          saveNotes();
-        }, 1000);
-      });
-    });
-
-    // Ativar/Desativar leitura automática
-    function toggleAutoSpeech() {
-      autoSpeechEnabled = !autoSpeechEnabled;
-      const btn = document.getElementById('toggle-speech-btn');
-      if (autoSpeechEnabled) {
-        btn.textContent = '🔊 Leitura: ON';
-        btn.style.background = 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)';
-        btn.style.boxShadow = '0 4px 20px rgba(74, 222, 128, 0.5), 0 0 20px rgba(74, 222, 128, 0.2)';
-      } else {
-        btn.textContent = '🔊 Leitura: OFF';
-        btn.style.background = 'linear-gradient(135deg, #ff9800 0%, #ff6f00 100%)';
-        btn.style.boxShadow = '0 4px 20px rgba(255, 152, 0, 0.5), 0 0 20px rgba(255, 152, 0, 0.2)';
-        window.speechSynthesis.cancel();
-      }
-    }
-
-    // Ler notas em voz alta
-    function speakNotes() {
-      if (!autoSpeechEnabled) return;
-      
-      const notes = allNotes[currentSlide] || '';
-      if (!notes.trim()) return;
-
-      window.speechSynthesis.cancel();
-      
-      const utterance = new SpeechSynthesisUtterance(`Slide ${currentSlide}. ${notes}`);
+    function speakSlideNumber() {
+      const utterance = new SpeechSynthesisUtterance(`Slide ${currentSlide}`);
       utterance.lang = 'pt-BR';
       utterance.rate = 0.9;
-      utterance.pitch = 1;
-      
-      window.speechSynthesis.speak(utterance);
+      speechSynthesis.speak(utterance);
     }
 
-    // Baixar notas como PDF
-    function downloadNotesAsPDF() {
-      const hasNotes = Object.values(allNotes).some(note => note.trim());
-      
-      if (!hasNotes) {
-        alert('Nenhuma nota para baixar. Adicione anotações primeiro!');
-        return;
+    function toggleSpeech() {
+      autoSpeechEnabled = !autoSpeechEnabled;
+      const btn = document.getElementById('speech-btn');
+      if (autoSpeechEnabled) {
+        btn.style.background = 'linear-gradient(135deg, #4caf50 0%, #45a049 100%)';
+        btn.style.boxShadow = '0 4px 20px rgba(76, 175, 80, 0.5), 0 0 20px rgba(76, 175, 80, 0.2)';
+        speakSlideNumber();
+      } else {
+        btn.style.background = 'linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%)';
+        btn.style.boxShadow = '0 4px 20px rgba(100, 181, 246, 0.5), 0 0 20px rgba(100, 181, 246, 0.2)';
+        speechSynthesis.cancel();
       }
+    }
 
-      let content = `NOTAS DE AULA - ${config.presentation_title}\n`;
-      content += `Data: ${new Date().toLocaleDateString('pt-BR')}\n`;
+    function toggleVoiceRecognition() {
+      voiceEnabled = !voiceEnabled;
+      const btn = document.getElementById('voice-btn');
+      if (voiceEnabled) {
+        btn.style.background = 'linear-gradient(135deg, #4caf50 0%, #45a049 100%)';
+        btn.style.boxShadow = '0 4px 20px rgba(76, 175, 80, 0.5), 0 0 20px rgba(76, 175, 80, 0.2)';
+        recognition.start();
+      } else {
+        btn.style.background = 'linear-gradient(135deg, #b366ff 0%, #7c2ae8 100%)';
+        btn.style.boxShadow = '0 4px 20px rgba(179, 102, 255, 0.5), 0 0 20px rgba(179, 102, 255, 0.2)';
+        recognition.stop();
+      }
+    }
+
+    function toggleNotes() {
+      const panel = document.getElementById('notes-panel');
+      panel.style.display = panel.style.display === 'none' ? 'flex' : 'none';
+    }
+
+    function downloadPDF() {
+      let content = `NOTAS - ${config.presentation_title}\n`;
       content += '='.repeat(50) + '\n\n';
-
+      
       for (let i = 1; i <= totalSlides; i++) {
         if (allNotes[i]) {
-          content += `SLIDE ${i}:\n`;
-          content += allNotes[i] + '\n';
-          content += '-'.repeat(50) + '\n\n';
+          content += `--- SLIDE ${i} ---\n`;
+          content += allNotes[i] + '\n\n';
         }
       }
 
-      // Criar blob e baixar
       const blob = new Blob([content], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `notas-anatomia-${new Date().getTime()}.txt`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Notas_Anatomia_${new Date().toLocaleDateString()}.txt`;
+      a.click();
       URL.revokeObjectURL(url);
+    }
+
+    async function extrairTextoDoSlide() {
+      const status = document.getElementById('ocr-status');
+      const btn = document.getElementById('ocr-btn');
+      const textarea = document.getElementById('notes-textarea');
+      
+      const imageElement = document.querySelector('.slide-image');
+      if (!imageElement) {
+        status.textContent = "❌ Nenhuma imagem encontrada.";
+        return;
+      }
+
+      try {
+        btn.disabled = true;
+        status.textContent = "🤖 IA Analisando imagem... aguarde.";
+        
+        const result = await Tesseract.recognize(imageElement.src, 'por', {
+          logger: m => {
+            if (m.status === 'recognizing text') {
+              status.textContent = `Lendo: ${Math.round(m.progress * 100)}%`;
+            }
+          }
+        });
+
+        const textoExtraido = result.data.text.trim();
+        
+        if (textoExtraido) {
+          allNotes[currentSlide] = (allNotes[currentSlide] ? allNotes[currentSlide] + "\n\n" : "") + "[TEXTO EXTRAÍDO]:\n" + textoExtraido;
+          textarea.value = allNotes[currentSlide];
+          saveNotes();
+          status.textContent = "✅ Texto extraído com sucesso!";
+        } else {
+          status.textContent = "⚠️ Nenhum texto identificado.";
+        }
+
+      } catch (error) {
+        console.error(error);
+        status.textContent = "❌ Erro na IA ao ler imagem.";
+      } finally {
+        btn.disabled = false;
+        setTimeout(() => status.textContent = "", 3000);
+      }
     }
 
     async function initElement() {
@@ -725,36 +624,14 @@
 
     function renderSlide() {
       const container = document.getElementById('slide-container');
-      container.style.opacity = '0';
-      container.style.transition = 'opacity 0.15s ease';
       
-      setTimeout(() => {
-        container.innerHTML = '';
-        const img = document.createElement('img');
-        img.src = `assets/slide${currentSlide}.jpg`;
-        img.alt = `Slide ${currentSlide}`;
-        img.className = 'slide-image';
-        img.loading = 'lazy';
-        img.onerror = function() {
-          console.error('Imagem não carregada:', this.src);
-          container.innerHTML = `
-            <div class="placeholder">
-              <div style="font-size: 3rem; margin-bottom: 1rem;">📊</div>
-              <div>Slide ${currentSlide}</div>
-              <div style="font-size: 0.9rem; margin-top: 0.5rem; color: #95a5a6;">
-                Imagem não disponível
-              </div>
-            </div>
-          `;
-          container.style.opacity = '1';
-        };
-        img.onload = function() {
-          container.style.opacity = '1';
-          // Ler notas automaticamente se habilitado
-          speakNotes();
-        };
-        container.appendChild(img);
-      }, 150);
+      if (currentSlide === 18) {
+        // Carrega o seu jogo do GitHub no lugar da imagem
+        container.innerHTML = `<iframe src="https://pinheiro767.github.io/Inicio-anato-2026/" style="width:100%; height:100%; border:none;"></iframe>`;
+      } else {
+        // Carrega a imagem normal para todos os outros slides (1-17 e 19-37)
+        container.innerHTML = `<img src="assets/slide${currentSlide}.jpg" class="slide-image" onerror="this.onerror=null; this.src='https://via.placeholder.com/800x600?text=Slide+${currentSlide}'">`;
+      }
     }
 
     function updateUI() {
@@ -771,8 +648,16 @@
       document.getElementById('slide-1-buttons').style.display = currentSlide === 1 ? 'flex' : 'none';
       document.getElementById('slide-18-buttons').style.display = currentSlide === 18 ? 'flex' : 'none';
 
-      updateNotesPanel();
       renderSlide();
+      
+      // Atualiza notas
+      if (document.getElementById('notes-textarea')) {
+        document.getElementById('notes-slide-number').textContent = currentSlide;
+        document.getElementById('notes-textarea').value = allNotes[currentSlide] || '';
+      }
+      
+      // Fala o número do slide se auto-fala ativa
+      if (autoSpeechEnabled) speakSlideNumber();
     }
 
     function openCronograma() {
@@ -832,8 +717,8 @@
     });
 
     // Inicializar
-    loadNotes();
     initElement();
+    loadNotes();
     updateUI();
 
     // Configuração do Reconhecimento de Voz
@@ -856,15 +741,24 @@
         }
       };
 
-      recognition.onend = () => {
-        recognition.start();
+      recognition.onerror = (event) => {
+        console.error("Erro de voz:", event.error);
       };
 
-      recognition.start();
-      console.log("IA de Voz Ativa: Diga 'Próximo' ou 'Anterior'");
+      recognition.onend = () => {
+        if (voiceEnabled) {
+          recognition.start();
+        }
+      };
+
+      if (voiceEnabled) {
+        recognition.start();
+      }
+      console.log("IA de Voz Pronta!");
     } else {
-      console.error("Este navegador não suporta comandos de voz.");
+      console.error("Navegador não suporta reconhecimento de voz.");
     }
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d19ec16a49ff8bf',t:'MTc3MTcxNTQ4MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+  </div>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d1a549f5409625e',t:'MTc3MTcxOTc2Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
