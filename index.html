@@ -1,262 +1,721 @@
 <!doctype html>
 <html lang="pt-br" class="h-full">
- <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Apresentador de Anatomia - Prof. Cláudia Pinheiro</title>
-  <script src="/_sdk/element_sdk.js"></script>
+
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { height: 100%; width: 100%; }
     body {
       font-family: 'Segoe UI', sans-serif;
       background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
-      color: #fff; overflow: hidden; 
+      color: #fff;
+      overflow: hidden;
     }
+
     .app-wrapper { display: flex; flex-direction: column; height: 100%; width: 100%; }
-    .header { background: rgba(48, 43, 99, 0.8); padding: 1.2rem; border-bottom: 2px solid #64b5f6; text-align: center; }
-    .title { font-size: clamp(1.5rem, 4vw, 2.2rem); font-weight: 700; color: #64b5f6; text-shadow: 0 0 15px rgba(100, 181, 246, 0.5); }
-    .content { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem; position: relative; }
-    .slide-container { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); border-radius: 20px; border: 2px solid rgba(100, 181, 246, 0.3); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); overflow: hidden; }
-    .slide-image { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 10px; animation: slideIn 0.5s ease-out; }
-    @keyframes slideIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-    .controls { display: flex; align-items: center; justify-content: center; gap: 1.5rem; padding: 1.5rem; background: rgba(48, 43, 99, 0.9); border-top: 2px solid #64b5f6; flex-wrap: wrap; }
-    .btn { background: #42a5f5; color: white; padding: 0.8rem 1.5rem; border-radius: 25px; font-weight: bold; cursor: pointer; border: none; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-    .btn:hover:not(:disabled) { transform: translateY(-3px); background: #2196f3; box-shadow: 0 6px 20px rgba(100, 181, 246, 0.6); }
+
+    .header {
+      background: rgba(48, 43, 99, 0.8);
+      padding: 1.2rem;
+      border-bottom: 2px solid #64b5f6;
+      text-align: center;
+    }
+
+    .title {
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
+      font-weight: 700;
+      color: #64b5f6;
+      text-shadow: 0 0 15px rgba(100, 181, 246, 0.5);
+    }
+
+    .content {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      position: relative;
+    }
+
+    .slide-container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.2);
+      border-radius: 20px;
+      border: 2px solid rgba(100, 181, 246, 0.3);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .slide-image {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 10px;
+      animation: slideIn 0.5s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      padding: 1.2rem;
+      background: rgba(48, 43, 99, 0.9);
+      border-top: 2px solid #64b5f6;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background: #42a5f5;
+      color: white;
+      padding: 0.75rem 1.25rem;
+      border-radius: 25px;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+      transition: 0.3s;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .btn:hover:not(:disabled) {
+      transform: translateY(-3px);
+      background: #2196f3;
+      box-shadow: 0 6px 20px rgba(100, 181, 246, 0.6);
+    }
+
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
     .btn-voice-active { background: #4caf50 !important; }
     .btn-voice-inactive { background: #ff9800 !important; }
-    
-    /* Panel de Notas */
-    .notes-panel { 
-      position: fixed; right: -420px; top: 0; width: 420px; height: 100%; 
-      background: rgba(15, 12, 41, 0.95); border-left: 2px solid #b366ff;
-      transition: 0.4s ease; z-index: 1000; display: flex; flex-direction: column;
-      backdrop-filter: blur(20px); box-shadow: -8px 0 32px rgba(0, 0, 0, 0.5);
+
+    .slide-info { display: flex; align-items: center; gap: 0.5rem; }
+
+    .progress-bar {
+      width: 200px;
+      height: 8px;
+      background: rgba(100, 181, 246, 0.2);
+      border-radius: 5px;
+      overflow: hidden;
+      border: 1px solid rgba(100, 181, 246, 0.4);
     }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ffc107, #ff9800);
+      width: 0%;
+      transition: 0.4s;
+    }
+
+    .placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(100, 200, 255, 0.1), rgba(255, 100, 200, 0.1));
+      border-radius: 12px;
+      font-size: 1.2rem;
+      color: #a0c4ff;
+    }
+
+    /* Botões de links por slide */
+    .link-buttons {
+      position: absolute;
+      bottom: 40px;
+      left: 0;
+      width: 100%;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 0 12px;
+      pointer-events: none;
+    }
+
+    .link-buttons a {
+      pointer-events: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 800;
+      padding: 12px 18px;
+      border-radius: 999px;
+      box-shadow: 0 10px 26px rgba(0,0,0,.45);
+      border: 1px solid rgba(255,255,255,.18);
+      backdrop-filter: blur(10px);
+      transition: transform .25s ease, filter .25s ease;
+      filter: saturate(1.05);
+    }
+
+    .link-buttons a:hover {
+      transform: translateY(-2px) scale(1.03);
+      filter: saturate(1.2);
+    }
+
+    /* Panel de Notas */
+    .notes-panel {
+      position: fixed;
+      right: -420px;
+      top: 0;
+      width: 420px;
+      height: 100%;
+      background: rgba(15, 12, 41, 0.95);
+      border-left: 2px solid #b366ff;
+      transition: 0.4s ease;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      backdrop-filter: blur(20px);
+      box-shadow: -8px 0 32px rgba(0, 0, 0, 0.5);
+    }
+
     .notes-panel.active { right: 0; }
-    .notes-header { padding: 1.5rem; border-bottom: 1px solid rgba(100, 181, 246, 0.4); display: flex; justify-content: space-between; align-items: center; background: rgba(100, 181, 246, 0.1); }
+
+    .notes-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(100, 181, 246, 0.4);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(100, 181, 246, 0.1);
+    }
+
     .notes-header h3 { font-size: 1.1rem; color: #64b5f6; }
-    .notes-close { color: #64b5f6; background: none; border: none; cursor: pointer; font-size: 1.5rem; transition: 0.2s; }
+
+    .notes-close {
+      color: #64b5f6;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.5rem;
+      transition: 0.2s;
+    }
+
     .notes-close:hover { color: #42a5f5; }
-    #notes-text { flex: 1; background: rgba(15, 12, 41, 0.9); color: #fff; padding: 1.5rem; border: none; outline: none; resize: none; font-size: 0.95rem; border-top: 1px solid rgba(100, 181, 246, 0.2); font-family: 'Segoe UI', sans-serif; line-height: 1.6; }
+
+    #notes-text {
+      flex: 1;
+      background: rgba(15, 12, 41, 0.9);
+      color: #fff;
+      padding: 1.5rem;
+      border: none;
+      outline: none;
+      resize: none;
+      font-size: 0.95rem;
+      border-top: 1px solid rgba(100, 181, 246, 0.2);
+      font-family: 'Segoe UI', sans-serif;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
     #notes-text::placeholder { color: rgba(255, 255, 255, 0.4); }
-    .notes-buttons { padding: 1.2rem; display: flex; gap: 8px; flex-wrap: wrap; background: rgba(100, 181, 246, 0.05); border-top: 1px solid rgba(100, 181, 246, 0.2); }
-    .notes-btn { flex: 1; min-width: 110px; padding: 0.7rem; font-size: 0.8rem; border-radius: 20px; border: none; cursor: pointer; font-weight: 600; transition: 0.3s; color: white; }
+
+    .notes-buttons {
+      padding: 1.2rem;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      background: rgba(100, 181, 246, 0.05);
+      border-top: 1px solid rgba(100, 181, 246, 0.2);
+    }
+
+    .notes-btn {
+      flex: 1;
+      min-width: 110px;
+      padding: 0.7rem;
+      font-size: 0.8rem;
+      border-radius: 20px;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      transition: 0.3s;
+      color: white;
+    }
+
     .notes-btn-primary { background: #b366ff; }
     .notes-btn-primary:hover { background: #9d4edd; transform: translateY(-2px); }
+
     .notes-btn-success { background: #4caf50; }
     .notes-btn-success:hover { background: #45a049; transform: translateY(-2px); }
+
     .notes-btn-danger { background: #f44336; }
     .notes-btn-danger:hover { background: #da190b; transform: translateY(-2px); }
 
-    .slide-info { display: flex; align-items: center; gap: 0.5rem; }
-    .progress-bar { width: 200px; height: 8px; background: rgba(100, 181, 246, 0.2); border-radius: 5px; overflow: hidden; border: 1px solid rgba(100, 181, 246, 0.4); }
-    .progress-fill { height: 100%; background: linear-gradient(90deg, #ffc107, #ff9800); width: 0%; transition: 0.4s; }
-    .placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(100, 200, 255, 0.1), rgba(255, 100, 200, 0.1)); border-radius: 12px; font-size: 1.2rem; color: #a0c4ff; }
+    /* Status da voz */
+    #voice-status {
+      font-weight: 800;
+      opacity: .95;
+      padding: .3rem .7rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.18);
+    }
 
     @media (max-width: 768px) {
       .notes-panel { width: 80vw; right: -80vw; }
       .controls { gap: 0.8rem; }
       .btn { padding: 0.6rem 1rem; font-size: 0.85rem; }
+      .progress-bar { width: 150px; }
+      .link-buttons { bottom: 18px; }
     }
   </style>
-  <style>body { box-sizing: border-box; }</style>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
- </head>
- <body>
+</head>
+
+<body>
   <div class="app-wrapper">
-   <div class="header">
-    <h1 class="title" id="presentation-title">Introdução à Anatomia Humana</h1>
-   </div>
-   <div class="content">
-    <div class="slide-container" id="slide-container">
-     <div class="placeholder">
-      <div style="font-size: 3rem; margin-bottom: 1rem;">
-       📊
-      </div>
-      <div>
-       Carregando slide...
-      </div>
-     </div>
+    <div class="header">
+      <h1 class="title" id="presentation-title">Introdução à Anatomia Humana</h1>
     </div>
-   </div>
-   <div class="controls"><button class="btn" id="prev-btn" onclick="previousSlide()">← Anterior</button>
-    <div class="slide-info"><span id="slide-num" style="font-weight:bold;">1 / 37</span>
+
+    <div class="content">
+      <div class="slide-container" id="slide-container">
+        <div class="placeholder">
+          <div style="font-size: 3rem; margin-bottom: 1rem;">📊</div>
+          <div>Carregando slide...</div>
+        </div>
+      </div>
     </div>
-    <div class="progress-bar">
-     <div class="progress-fill" id="progress-fill"></div>
-    </div><button class="btn" style="background:#9c27b0" onclick="toggleNotes()">📝 Notas</button> <button class="btn btn-voice-inactive" id="voice-btn" onclick="toggleVoice()">🎤 Voz</button> <button class="btn" id="next-btn" onclick="nextSlide()">Próximo →</button>
-   </div>
-  </div><!-- Panel de Notas -->
-  <div class="notes-panel" id="notes-panel">
-   <div class="notes-header">
-    <h3>📝 Notas - Slide <span id="note-num">1</span></h3><button class="notes-close" onclick="toggleNotes()">✕</button>
-   </div><textarea id="notes-text" placeholder="Escreva suas observações ou extraia o texto do slide..."></textarea>
-   <div class="notes-buttons"><button class="notes-btn notes-btn-primary" onclick="extractText()">📄 Extrair</button> <button class="notes-btn notes-btn-success" onclick="downloadPDF()">📥 PDF</button> <button class="notes-btn notes-btn-danger" onclick="clearNotes()">🗑️ Limpar</button>
-   </div>
+
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="previousSlide()">← Anterior</button>
+
+      <div class="slide-info">
+        <span id="slide-num" style="font-weight:bold;">1 / 37</span>
+      </div>
+
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+
+      <button class="btn" style="background:#9c27b0" onclick="toggleNotes()">📝 Notas</button>
+
+      <button class="btn btn-voice-inactive" id="voice-btn" onclick="toggleVoice()">🎤 Voz</button>
+      <span id="voice-status">🎤 Voz: desligada</span>
+
+      <button class="btn" id="next-btn" onclick="nextSlide()">Próximo →</button>
+    </div>
   </div>
+
+  <!-- Panel de Notas -->
+  <div class="notes-panel" id="notes-panel">
+    <div class="notes-header">
+      <h3>📝 Notas - Slide <span id="note-num">1</span></h3>
+      <button class="notes-close" onclick="toggleNotes()">✕</button>
+    </div>
+
+    <textarea id="notes-text" placeholder="Escreva suas observações ou extraia o texto do slide..."></textarea>
+
+    <div class="notes-buttons">
+      <button class="notes-btn notes-btn-primary" onclick="extractText()">📄 Extrair</button>
+      <button class="notes-btn notes-btn-success" onclick="downloadPDF()">📥 PDF</button>
+      <button class="notes-btn notes-btn-danger" onclick="clearNotes()">🗑️ Limpar</button>
+    </div>
+  </div>
+
   <script>
     let currentSlide = 1;
     const totalSlides = 37;
+
+    // ====== VOZ (robusto) ======
     let voiceActive = false;
     let recognition = null;
-    let config = { presentation_title: 'Introdução à Anatomia Humana' };
-    const defaultConfig = { presentation_title: 'Introdução à Anatomia Humana' };
 
-    // Dados dos slides com transcrições completas
-    const slideData = {
-      1: { text: "Introdução a Anatomia humana. Professora: Claudia Pinheiro.", links: [{ label: "📅 Cronograma", url: "https://pinheiro767.github.io/Turma-seg-2026/", color: "#ff9800" }] },
-      2: { text: "A Anatomia é uma das mais antigas ciências médicas básicas: foi estudada formalmente pela primeira vez no Egito (aproximadamente 500 a.C.)." },
-      3: { text: "Galeno (Séc. II e III, Império Romano): Primeiro anatomista do mundo. Tinha experiência apenas em dissecação de porcos, macacos e outros animais." },
-      4: { text: "Andreas Vesalius (1514-1564): Pai da Anatomia Moderna, ícone da Renascença. Seus estudos através da dissecação de corpos humanos avançaram significativamente em relação aos de Galeno." },
-      5: { text: "Ressurrecionistas: Passaram séculos desenterrando corpos de túmulos para revendê-los a estudiosos." },
-      6: { text: "Mortsafes: Grades colocadas sobre os túmulos para evitar o roubo de corpos." },
-      7: { text: "William Burke e William Hare: Dupla que eliminava vítimas em Edimburgo para lucrar vendendo os corpos para anatomistas." },
-      8: { text: "Etimologia: Anatomia (Grego 'Anatome' - corte através de) e Dissecação (Latim 'Dis secare' - cortar separado)." },
-      9: { text: "Subdivisões: Anatomia Macroscópica, Microscópica e do Desenvolvimento." },
-      10: { text: "Níveis de Organização e Sistemas do Corpo." },
-      11: { text: "Hierarquia Biológica: Representação visual de Átomo, Molécula, Organelas, Célula, Tecido, Órgão e Sistema." },
-      12: { text: "Métodos de Estudo: Anatomia regional, sistêmica e clínica. Termos: Tecido, Órgão." },
-      13: { text: "Formas de Estudar: Dissecação, Imagens, Modelos, Apalpação e Auscultação." },
-      14: { text: "Considerações Anatômicas: Divisão do corpo humano e Posição Anatômica." },
-      15: { text: "Posição Anatômica: 1. Cabeça, olhos e dedos dos pés voltados anteriormente; 2. Braços ao lado do corpo com palmas voltadas anteriormente; 3. Membros inferiores próximos e pés paralelos." },
-      16: { text: "Termos de movimento." },
-      17: { text: "Dinâmica: Movimentos ocorrem em planos e eixos específicos, envolvendo ossos, músculos e articulações." },
-      18: { text: "Planos Anatômicos: Transversal (mediano) e Sagital.", links: [{ label: "🎮 Jogos", url: "https://pinheiro767.github.io/Inicio-anato-2026/", color: "#4caf50" }, { label: "🧪 Teste", url: "https://pinheiro767.github.io/Inicio-anato-2026/", color: "#b366ff" }] },
-      19: { text: "Plano Mediano: Divide o corpo humano em lados direito e esquerdo." },
-      20: { text: "Plano Sagital: Divide o corpo em duas partes assimétricas." },
-      21: { text: "Plano Frontal (Coronal): Divide o corpo em partes anterior e posterior." },
-      22: { text: "Plano Transverso (Axial): Divide o corpo em partes superior e inferior." },
-      23: { text: "Eixos do Corpo Humano: Linhas imaginárias que atravessam planos paralelos em torno das quais ocorrem os movimentos." },
-      24: { text: "Plano Frontal x Eixo Sagital: Movimentos de Abdução e Adução ocorrem em planos frontais em torno de um eixo antero-posterior." },
-      25: { text: "Plano Sagital x Eixo Latero-lateral: Flexão e Extensão geralmente ocorrem em planos sagitais em torno de um eixo transverso." },
-      26: { text: "Plano Transversal x Eixo Longitudinal: Movimentos de rotação ocorrem no plano transversal em torno do eixo longitudinal." },
-      27: { text: "Glossário: Flexão (diminui ângulo), Abdução/Adução (afasta/aproxima da linha média), Rotação (gira no eixo) e Circundação (movimento circular combinado)." },
-      28: { text: "Importância: Compreender movimentos é fundamental para profissionais da saúde e esporte, contribuindo para mobilidade e prevenção de lesões." },
-      29: { text: "Cortes Anatômicos: Principal uso dos planos é descrever cortes Longitudinais, Oblíquos e Transversos." },
-      30: { text: "Esquema Visual: Ilustrações dos planos Sagital e Transversal." },
-      31: { text: "Terminologia Anatômica e Posição Anatômica." },
-      32: { text: "Termos de Relação: Superior (Cranial), Inferior (Caudal), Anterior (Ventral), Posterior (Dorsal). Faces Palmar e Plantar." },
-      33: { text: "Termos de Comparação: Superficial, Intermédio e Profundo; Proximal, Distal, Medial e Lateral." },
-      34: { text: "Conceito Normal: Características anatômicas presentes na maioria da população, consideradas mais frequentes ou comuns." },
-      35: { text: "Anomalia: Alteração morfológica que difere do normal, traz prejuízo à função, mas é compatível com a vida (ex: Polidactilia)." },
-      36: { text: "Monstruosidade: Alteração grave que compromete estruturas vitais e gera prejuízo funcional severo, sendo incompatível com a vida." },
-      37: { text: "História: Freak shows do século XIX, incluindo Julia Pastrana, irmãos siameses e o menino parasita." }
-    };
-
-    // Inicializar Element SDK
-    async function initElement() {
-      if (!window.elementSdk) return;
-      await window.elementSdk.init({
-        defaultConfig,
-        onConfigChange: async (newConfig) => {
-          config = newConfig;
-          document.getElementById('presentation-title').textContent = config.presentation_title || defaultConfig.presentation_title;
-        },
-        mapToCapabilities: () => ({ recolorables: [], borderables: [], fontEditable: undefined, fontSizeable: undefined }),
-        mapToEditPanelValues: (cfg) => new Map([['presentation_title', cfg.presentation_title || defaultConfig.presentation_title]])
-      });
+    function normalizeText(s) {
+      return (s || "")
+        .toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .trim();
     }
 
+    function setVoiceUI(active, msg = "") {
+      const btn = document.getElementById("voice-btn");
+      const status = document.getElementById("voice-status");
+
+      if (active) {
+        btn.classList.add("btn-voice-active");
+        btn.classList.remove("btn-voice-inactive");
+        btn.textContent = "🎤 Ouvindo";
+        status.textContent = msg ? `🎤 Voz: ouvindo — ${msg}` : "🎤 Voz: ouvindo";
+      } else {
+        btn.classList.remove("btn-voice-active");
+        btn.classList.add("btn-voice-inactive");
+        btn.textContent = "🎤 Voz";
+        status.textContent = msg ? `🎤 Voz: desligada — ${msg}` : "🎤 Voz: desligada";
+      }
+    }
+
+    function parseSlideNumber(cmd) {
+      const m = cmd.match(/\b(\d{1,3})\b/);
+      if (m) return parseInt(m[1], 10);
+
+      const map = {
+        "um": 1, "uma": 1,
+        "dois": 2, "duas": 2,
+        "tres": 3,
+        "quatro": 4,
+        "cinco": 5,
+        "seis": 6,
+        "sete": 7,
+        "oito": 8,
+        "nove": 9,
+        "dez": 10,
+        "onze": 11,
+        "doze": 12,
+        "treze": 13,
+        "quatorze": 14,
+        "catorze": 14,
+        "quinze": 15,
+        "dezesseis": 16,
+        "dezessete": 17,
+        "dezoito": 18,
+        "dezenove": 19,
+        "vinte": 20
+      };
+
+      for (const [k, v] of Object.entries(map)) {
+        if (cmd.includes(` ${k}`) || cmd.endsWith(k)) return v;
+      }
+      return null;
+    }
+
+    function openLinkForSlide(slideNumber, preferLabelIncludes = "") {
+      const s = slideData[slideNumber];
+      if (!s || !s.links || !s.links.length) return false;
+
+      let link = s.links[0];
+      if (preferLabelIncludes) {
+        const found = s.links.find(l => normalizeText(l.label).includes(normalizeText(preferLabelIncludes)));
+        if (found) link = found;
+      }
+      window.open(link.url, "_blank", "noopener,noreferrer");
+      return true;
+    }
+
+    function handleVoiceCommand(raw) {
+      const cmd = normalizeText(raw);
+
+      if (cmd.includes("proximo") || cmd.includes("avancar") || cmd.includes("seguir")) {
+        setVoiceUI(true, "comando: próximo");
+        nextSlide();
+        return;
+      }
+
+      if (cmd.includes("anterior") || cmd.includes("voltar") || cmd.includes("retornar")) {
+        setVoiceUI(true, "comando: anterior");
+        previousSlide();
+        return;
+      }
+
+      // Ir para slide X
+      if (cmd.includes("ir para") || cmd.includes("vai para") || cmd.includes("slide") || cmd.includes("pagina")) {
+        const n = parseSlideNumber(cmd);
+        if (n != null) {
+          setVoiceUI(true, `ir para slide ${n}`);
+          goToSlide(n);
+          return;
+        }
+      }
+
+      // Primeiro / último
+      if (cmd.includes("primeiro")) { setVoiceUI(true, "primeiro slide"); goToSlide(1); return; }
+      if (cmd.includes("ultimo") || cmd.includes("final")) { setVoiceUI(true, "último slide"); goToSlide(totalSlides); return; }
+
+      // Notas
+      if (cmd.includes("abrir notas") || cmd.includes("mostrar notas")) { setVoiceUI(true, "abrir notas"); openNotes(true); return; }
+      if (cmd.includes("fechar notas") || cmd.includes("esconder notas")) { setVoiceUI(true, "fechar notas"); openNotes(false); return; }
+
+      // Ações de notas
+      if (cmd.includes("extrair") || cmd.includes("transcrever")) { setVoiceUI(true, "extrair texto"); extractText(); return; }
+      if (cmd.includes("baixar pdf") || cmd.includes("gerar pdf") || cmd.includes("download pdf")) { setVoiceUI(true, "baixar PDF"); downloadPDF(); return; }
+      if (cmd.includes("limpar") || cmd.includes("apagar notas")) { setVoiceUI(true, "limpar notas"); clearNotes(); return; }
+
+      // Links rápidos
+      if (cmd.includes("cronograma")) {
+        setVoiceUI(true, "abrir cronograma");
+        openLinkForSlide(1, "cronograma");
+        return;
+      }
+      if (cmd.includes("teste")) {
+        setVoiceUI(true, "abrir teste");
+        openLinkForSlide(18, "teste");
+        return;
+      }
+      if (cmd.includes("jogos")) {
+        setVoiceUI(true, "abrir jogos");
+        openLinkForSlide(18, "jogos");
+        return;
+      }
+
+      setVoiceUI(true, `ouvi: "${raw.trim()}" (sem ação)`);
+    }
+
+    function setupRecognition() {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) return null;
+
+      const r = new SR();
+      r.lang = "pt-BR";
+      r.continuous = true;
+      r.interimResults = true;
+
+      let lastFinal = "";
+
+      r.onstart = () => setVoiceUI(true);
+      r.onerror = (e) => setVoiceUI(voiceActive, `erro: ${e.error || "desconhecido"}`);
+
+      r.onresult = (e) => {
+        let interim = "";
+        let finalTxt = "";
+
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          const t = e.results[i][0].transcript;
+          if (e.results[i].isFinal) finalTxt += t + " ";
+          else interim += t + " ";
+        }
+
+        if (interim.trim()) setVoiceUI(true, `ouvindo: ${interim.trim()}`);
+
+        const cleanFinal = finalTxt.trim();
+        if (cleanFinal && cleanFinal !== lastFinal) {
+          lastFinal = cleanFinal;
+          handleVoiceCommand(cleanFinal);
+        }
+      };
+
+      r.onend = () => {
+        if (voiceActive) {
+          try { r.start(); } catch (_) {}
+        } else {
+          setVoiceUI(false);
+        }
+      };
+
+      return r;
+    }
+
+    function toggleVoice() {
+      if (!recognition) recognition = setupRecognition();
+      if (!recognition) { alert("Seu navegador não suporta reconhecimento de voz."); return; }
+
+      voiceActive = !voiceActive;
+
+      if (voiceActive) {
+        try { recognition.start(); } catch (e) {}
+        setVoiceUI(true, "diga: próximo, anterior, abrir notas, ir para slide 10...");
+      } else {
+        try { recognition.stop(); } catch (_) {}
+        setVoiceUI(false);
+      }
+    }
+
+    // ====== TRANSCRIÇÕES + LINKS ======
+    const slideData = {
+      1: {
+        text:
+`Página 1: Capa
+- Texto principal: Introdução a Anatomia humana
+- Professora: Claudia Pinheiro
+- Conteúdo adicional: Fragmentos de texto em latim (Lorem Ipsum) e elementos gráficos decorativos.`,
+        links: [
+          { label: "📅 Cronograma", url: "https://pinheiro767.github.io/Turma-seg-2026/", color: "#ff9800" }
+        ]
+      },
+      2: { text: `Página 2: História Antiga\n- "A anatomia é uma das mais antigas ciências médicas básicas: foi estudada formalmente pela primeira vez no Egito (aproximadamente 500 a.C.)".` },
+      3: { text: `Página 3: Galeno\n- Galeno viveu nos séculos II e III durante o Império Romano.\n- É considerado o primeiro anatomista do mundo.\n- Tinha experiência apenas em dissecação de porcos, macacos e outros animais.` },
+      4: { text: `Página 4: Andreas Vesalius\n- Andreas Vesalius (1514-1564) é considerado o Pai da Anatomia Moderna e um ícone da Renascença.\n- Seus estudos avançaram em relação aos de Galeno por utilizar a dissecação de corpos humanos em vez de animais.` },
+      5: { text: `Página 5: Ressurrecionistas\n- Conhecidos como ressurrecionistas, pessoas passaram séculos desenterrando corpos de túmulos para revendê-los a estudiosos.` },
+      6: { text: `Página 6: Proteção de Túmulos\n- Mortsafes: Grades colocadas sobre os túmulos para evitar o roubo de corpos.` },
+      7: { text: `Página 7: William Burke e William Hare\n- William Hare e sua esposa administravam uma pensão em Edimburgo onde William Burke morava.\n- Tornaram-se uma dupla que eliminava vítimas para lucrar com a venda dos corpos.` },
+      8: { text: `Página 8: Etimologia\n- Anatomia: Do grego anatome ("corte através de").\n- Dissecação: Do latim dis secare ("cortar separado").` },
+      9: { text: `Página 9: Subdivisões Anatômicas\n- Anatomia Macroscópica.\n- Anatomia Microscópica.\n- Anatomia do Desenvolvimento.` },
+      10:{ text: `Página 10: Organização\n- Níveis de Organização e Sistemas do Corpo.` },
+      11:{ text: `Página 11: Ilustração de Níveis\n- Representação visual em hexágonos: Átomo, Molécula, Tecido, Célula (Organelas), Coração (Órgão) e Sistema.` },
+      12:{ text: `Página 12: Métodos de Estudo\n- Anatomia regional.\n- Anatomia sistêmica.\n- Anatomia clínica.\n- Termos isolados: Tecido, Órgão.` },
+      13:{ text: `Página 13: Formas de Estudo\n- Dissecação.\n- Imagens.\n- Modelos.\n- Apalpação.\n- Auscultação.` },
+      14:{ text: `Página 14: Considerações Anatômicas\n- Divisão do corpo humano.\n- Posição Anatômica.` },
+      15:{ text: `Página 15: Posição Anatômica (Padrões)\n1) A cabeça, os olhos e os dedos dos pés voltados anteriormente (para frente).\n2) Os braços ao lado do corpo, com as palmas voltadas anteriormente.\n3) Os membros inferiores próximos, com os pés paralelos.` },
+      16:{ text: `Página 16: Termos de Movimento\n- Introdução aos termos de movimento.` },
+      17:{ text: `Página 17: Planos e Eixos\n- Os movimentos do corpo humano ocorrem em planos e eixos específicos, envolvendo a interação entre ossos, músculos e articulações.` },
+      18:{
+        text:`Página 18: Planos Anatômicos\n- Indicação de Plano Transversal (Mediano) e Plano Sagital.`,
+        links:[
+          { label:"🎮 Jogos", url:"https://pinheiro767.github.io/Inicio-anato-2026/", color:"#4caf50" },
+          { label:"🧪 Teste os conhecimentos", url:"https://pinheiro767.github.io/Inicio-anato-2026/", color:"#b366ff" }
+        ]
+      },
+      19:{ text:`Página 19: Plano Mediano\n- O plano mediano divide o corpo humano em lados direito e esquerdo.` },
+      20:{ text:`Página 20: Plano Sagital\n- Divide o corpo em duas partes assimétricas.` },
+      21:{ text:`Página 21: Plano Frontal\n- Também chamado de Coronal, divide o corpo em partes anterior e posterior.` },
+      22:{ text:`Página 22: Plano Transverso\n- Também chamado de Axial, divide o corpo em partes superior e inferior.` },
+      23:{ text:`Página 23: Eixos do Corpo Humano\n- Linhas imaginárias que atravessam planos paralelos em torno das quais ocorrem os movimentos.` },
+      24:{ text:`Página 24: Plano Frontal x Eixo Sagital\n- Movimentos de Abdução e Adução ocorrem em planos frontais em torno de um eixo ântero-posterior.` },
+      25:{ text:`Página 25: Plano Sagital x Eixo Látero-lateral\n- Os movimentos de Flexão e Extensão geralmente ocorrem em planos sagitais em torno de um eixo transverso.` },
+      26:{ text:`Página 26: Plano Transversal x Eixo Longitudinal\n- Os movimentos de Rotação ocorrem no plano transversal e acontecem em torno do eixo longitudinal.` },
+      27:{ text:`Página 27: Descrição de Movimentos\n- Flexão: Diminui o ângulo entre segmentos.\n- Abdução e Adução: Afasta e aproxima parte do corpo à linha média.\n- Rotação: Gira uma parte em torno de um eixo.\n- Circundação: Movimento circular que combina flexão, abdução e adução.` },
+      28:{ text:`Página 28: Importância dos Movimentos\n- Compreender esses movimentos é fundamental para profissionais da saúde e do esporte para mobilidade e prevenção de lesões.` },
+      29:{ text:`Página 29: Cortes Anatômicos\n- O principal uso dos planos é descrever cortes:\n  • Corte Longitudinal\n  • Corte Oblíquo\n  • Corte Transverso` },
+      30:{ text:`Página 30: Revisão de Planos\n- Ilustrações dos planos Sagital e Transversal.` },
+      31:{ text:`Página 31: Terminologia Anatômica\n- Início da seção sobre Terminologia Anatômica e Posição Anatômica.` },
+      32:{ text:`Página 32: Termos de Relação e Comparação (Parte 1)\n- Superior (Cranial): Mais próximo da cabeça.\n- Inferior (Caudal): Mais próximo dos pés.\n- Anterior (Ventral): Mais próximo da frente do corpo.\n- Posterior (Dorsal): Mais próximo das costas.\n- Palmar vs Dorsal (mão) e Plantar vs Dorsal (pé).\n- Superficial, Intermediário e Profundo.\n- Medial: Mais próximo do plano mediano.\n- Lateral: Mais distante do plano mediano.` },
+      33:{ text:`Página 33: Termos de Relação e Comparação (Parte 2)\n- Diagramas exemplificando: Superficial, Intermédio, Profundo, Distal, Medial, Proximal e Lateral.` },
+      34:{ text:`Página 34: Conceito: Normal\n- Refere-se às características anatômicas presentes na maioria da população, consideradas mais frequentes.` },
+      35:{ text:`Página 35: Conceito: Anomalia\n- Alteração morfológica que difere do normal e traz prejuízo à função, mas é compatível com a vida (ex: polidactilia).` },
+      36:{ text:`Página 36: Conceito: Monstruosidade\n- Alteração morfológica grave que compromete estruturas vitais e gera prejuízo funcional severo, sendo incompatível com a vida.\n- Tabela comparativa:\n  • Normal: Compatível com a vida; Sem prejuízo funcional.\n  • Anomalia: Compatível com a vida; Pode haver prejuízo funcional.\n  • Monstruosidade: Não compatível com a vida; Prejuízo funcional grave.` },
+      37:{ text:`Página 37: Freak Shows Históricos\n- Cartaz do século XIX sobre Julia Pastrana e o "Double-Bodied Boy".\n- Menciona a exposição de irmãos siameses e meninos parasitas em "freak shows".` }
+    };
+
+    // ====== UI / SLIDES ======
     function updateUI() {
       document.getElementById('slide-num').innerText = `${currentSlide} / ${totalSlides}`;
       document.getElementById('note-num').innerText = currentSlide;
       document.getElementById('progress-fill').style.width = (currentSlide / totalSlides) * 100 + "%";
-      
+
       const container = document.getElementById('slide-container');
-      container.innerHTML = `<img src="assets/slide${currentSlide}.jpg" class="slide-image" alt="Slide ${currentSlide}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'placeholder\\'><div style=\\'font-size: 2rem; margin-bottom: 1rem;\\'>📊</div><div>Slide ${currentSlide}</div></div>'">`;
-      
+
+      let html = `
+        <img src="assets/slide${currentSlide}.jpg"
+             class="slide-image"
+             alt="Slide ${currentSlide}"
+             loading="lazy"
+             onerror="this.parentElement.innerHTML='<div class=\\'placeholder\\'><div style=\\'font-size:2rem;margin-bottom:1rem;\\'>📊</div><div>Slide ${currentSlide}</div></div>'">
+      `;
+
+      if (slideData[currentSlide]?.links?.length) {
+        html += `<div class="link-buttons">`;
+        slideData[currentSlide].links.forEach(link => {
+          html += `
+            <a href="${link.url}" target="_blank" rel="noopener noreferrer"
+               style="background:${link.color};">
+              ${link.label}
+            </a>
+          `;
+        });
+        html += `</div>`;
+      }
+
+      container.innerHTML = html;
+
       document.getElementById('prev-btn').disabled = currentSlide === 1;
       document.getElementById('next-btn').disabled = currentSlide === totalSlides;
 
-      if(document.getElementById('notes-panel').classList.contains('active')) loadNotes();
+      if (document.getElementById('notes-panel').classList.contains('active')) loadNotes();
     }
 
-    function toggleNotes() { 
+    function nextSlide() { if (currentSlide < totalSlides) { currentSlide++; updateUI(); } }
+    function previousSlide() { if (currentSlide > 1) { currentSlide--; updateUI(); } }
+
+    // ====== NOTAS ======
+    function toggleNotes() {
       document.getElementById('notes-panel').classList.toggle('active');
-      if(document.getElementById('notes-panel').classList.contains('active')) loadNotes();
+      if (document.getElementById('notes-panel').classList.contains('active')) loadNotes();
     }
 
-    function loadNotes() { 
-      document.getElementById('notes-text').value = localStorage.getItem(`note-${currentSlide}`) || ""; 
+    function openNotes(open) {
+      const panel = document.getElementById('notes-panel');
+      if (open) panel.classList.add('active');
+      else panel.classList.remove('active');
+      if (panel.classList.contains('active')) loadNotes();
+    }
+
+    function loadNotes() {
+      document.getElementById('notes-text').value = localStorage.getItem(`note-${currentSlide}`) || "";
+    }
+
+    function saveNotes() {
+      localStorage.setItem(`note-${currentSlide}`, document.getElementById('notes-text').value);
     }
 
     function extractText() {
       const info = slideData[currentSlide]?.text || `Conteúdo do Slide ${currentSlide}`;
       const ta = document.getElementById('notes-text');
-      ta.value += (ta.value ? "\n\n" : "") + "--- TRANSCRIÇÃO SLIDE " + currentSlide + " ---\n" + info;
-      localStorage.setItem(`note-${currentSlide}`, ta.value);
+      ta.value += (ta.value ? "\n\n" : "") + `--- TRANSCRIÇÃO SLIDE ${currentSlide} ---\n` + info;
+      saveNotes();
     }
 
-    function downloadPDF() {
-      const { jsPDF } = window.jspdf;
-      const txt = document.getElementById('notes-text').value;
-      if(!txt.trim()) {
-        alert("Notas vazias! Escreva algo antes de baixar.");
-        return;
-      }
-      const doc = new jsPDF();
-      doc.setFontSize(16);
-      doc.text(`Aula de Anatomia - Slide ${currentSlide}`, 10, 20);
-      doc.setFontSize(11);
-      doc.text(txt, 10, 30, { maxWidth: 180 });
-      doc.save(`Aula_Anatomia_Slide_${currentSlide}.pdf`);
-    }
-
-    function clearNotes() { 
-      if(confirm("Tem certeza que deseja limpar as notas deste slide?")) {
-        document.getElementById('notes-text').value = ""; 
+    function clearNotes() {
+      if (confirm("Tem certeza que deseja limpar as notas deste slide?")) {
+        document.getElementById('notes-text').value = "";
         localStorage.removeItem(`note-${currentSlide}`);
       }
     }
 
-    function toggleVoice() {
-      if(!recognition) {
-        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if(!SR) {
-          alert("Seu navegador não suporta reconhecimento de voz.");
-          return;
-        }
-        recognition = new SR();
-        recognition.lang = 'pt-BR';
-        recognition.continuous = true;
-        recognition.onresult = (e) => {
-          const cmd = e.results[e.results.length-1][0].transcript.toLowerCase();
-          if(cmd.includes("próximo") || cmd.includes("avançar")) nextSlide();
-          if(cmd.includes("anterior") || cmd.includes("voltar")) previousSlide();
-        };
+    // PDF com quebra de linha e páginas
+    function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const txt = document.getElementById('notes-text').value;
+
+      if (!txt.trim()) {
+        alert("Notas vazias! Escreva algo antes de baixar.");
+        return;
       }
-      voiceActive ? recognition.stop() : recognition.start();
-      voiceActive = !voiceActive;
-      const btn = document.getElementById('voice-btn');
-      btn.classList.toggle('btn-voice-active');
-      btn.classList.toggle('btn-voice-inactive');
+
+      const doc = new jsPDF({ unit: "mm", format: "a4" });
+      const margin = 12;
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const maxWidth = pageWidth - margin * 2;
+      const lineHeight = 6;
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
+      doc.text(`Aula de Anatomia — Slide ${currentSlide}`, margin, 16);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+
+      const lines = doc.splitTextToSize(txt, maxWidth);
+
+      let y = 26;
+      for (let i = 0; i < lines.length; i++) {
+        if (y > pageHeight - margin) {
+          doc.addPage();
+          y = margin;
+        }
+        doc.text(lines[i], margin, y);
+        y += lineHeight;
+      }
+
+      doc.save(`Aula_Anatomia_Slide_${currentSlide}.pdf`);
     }
 
-    function nextSlide() { if(currentSlide < totalSlides) { currentSlide++; updateUI(); } }
-    function previousSlide() { if(currentSlide > 1) { currentSlide--; updateUI(); } }
-    
-    document.addEventListener('keydown', (e) => { 
-      if(e.key === "ArrowRight") nextSlide(); 
-      if(e.key === "ArrowLeft") previousSlide();
-      if(e.key === "Escape") {
-        if(document.getElementById('notes-panel').classList.contains('active')) {
-          document.getElementById('notes-panel').classList.remove('active');
-        }
+    document.addEventListener('keydown', (e) => {
+      if (e.key === "ArrowRight") nextSlide();
+      if (e.key === "ArrowLeft") previousSlide();
+      if (e.key === "Escape") {
+        const p = document.getElementById('notes-panel');
+        if (p.classList.contains('active')) p.classList.remove('active');
       }
     });
 
-    // Salvar notas ao digitar
-    document.getElementById('notes-text').addEventListener('change', () => {
-      localStorage.setItem(`note-${currentSlide}`, document.getElementById('notes-text').value);
-    });
+    document.getElementById('notes-text').addEventListener('input', saveNotes);
 
-    // Inicializar
-    initElement();
+    // ====== INIT ======
+    function goToSlide(n) {
+      const clamped = Math.min(totalSlides, Math.max(1, Number(n)));
+      currentSlide = clamped;
+      updateUI();
+    }
+
     updateUI();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d2317cf10cc2ce9',t:'MTc3MTgxMTY0Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
