@@ -1,16 +1,23 @@
 <!doctype html>
 <html lang="pt-br" class="h-full">
-<head>
+ <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Apresentador de Anatomia</title>
-
   <script src="/_sdk/element_sdk.js"></script>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { height: 100%; width: 100%; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+    }
+
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
@@ -20,6 +27,7 @@
       perspective: 1000px;
     }
 
+    /* Efeitos de luz animados */
     body::before {
       content: '';
       position: absolute;
@@ -107,8 +115,14 @@
     }
 
     @keyframes slideIn {
-      from { opacity: 0; transform: rotateX(45deg) rotateY(-20deg) scale(0.9); }
-      to { opacity: 1; transform: rotateX(0) rotateY(0) scale(1); }
+      from {
+        opacity: 0;
+        transform: rotateX(45deg) rotateY(-20deg) scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: rotateX(0) rotateY(0) scale(1);
+      }
     }
 
     .slide-image {
@@ -118,13 +132,17 @@
       border-radius: 12px;
       animation: imageZoom 0.6s ease-out;
       filter: drop-shadow(0 0 30px rgba(100, 181, 246, 0.3));
-      user-select: none;
-      -webkit-user-drag: none;
     }
 
     @keyframes imageZoom {
-      from { opacity: 0; transform: scale(0.8); }
-      to { opacity: 1; transform: scale(1); }
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
     }
 
     .placeholder {
@@ -177,7 +195,9 @@
       box-shadow: 0 8px 30px rgba(100, 181, 246, 0.7), 0 0 30px rgba(100, 181, 246, 0.4);
     }
 
-    .btn:active:not(:disabled) { transform: translateY(-3px) scale(1); }
+    .btn:active:not(:disabled) {
+      transform: translateY(-3px) scale(1);
+    }
 
     .btn:disabled {
       background: rgba(100, 100, 150, 0.4);
@@ -210,9 +230,12 @@
     @keyframes pulse {
       0% { box-shadow: 0 4px 20px rgba(255, 152, 0, 0.5), 0 0 20px rgba(255, 152, 0, 0.2), 0 0 0 0 rgba(255, 152, 0, 0.7); }
       70% { box-shadow: 0 4px 20px rgba(255, 152, 0, 0.5), 0 0 20px rgba(255, 152, 0, 0.2), 0 0 0 15px rgba(255, 152, 0, 0); }
-      100% { box-shadow: 0 4px 20px rgba(255, 152, 0, 0.5), 0 0 20px rgba(255, 152, 0, 0.2), 0 0 0 0 rgba(255, 152, 0, 0.7); }
+      100% { box-shadow: 0 4px 20px rgba(255, 152, 0, 0.5), 0 0 20px rgba(255, 152, 0, 0.2), 0 0 0 0 rgba(255, 152, 0, 0); }
     }
-    #teste-btn { animation: pulse 2s infinite; }
+
+    #teste-btn {
+      animation: pulse 2s infinite;
+    }
 
     .slide-info {
       display: flex;
@@ -271,131 +294,12 @@
       border: 1px solid rgba(100, 181, 246, 0.4);
     }
 
-    .notes-panel {
-      position: fixed;
-      right: -450px;
-      top: 0;
-      width: 450px;
-      height: 100%;
-      background: rgba(48, 43, 99, 0.95);
-      backdrop-filter: blur(20px);
-      border-left: 2px solid rgba(100, 181, 246, 0.5);
-      padding: 1.5rem;
-      box-shadow: -8px 0 32px rgba(0, 0, 0, 0.5);
-      transition: right 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-      z-index: 900;
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-    }
-    .notes-panel.active { right: 0; }
-
-    .notes-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem;
-      padding-bottom: 1rem;
-      border-bottom: 2px solid rgba(100, 181, 246, 0.3);
-    }
-
-    .notes-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #64b5f6;
-      text-shadow: 0 0 15px rgba(100, 181, 246, 0.4);
-    }
-
-    .close-notes {
-      background: rgba(255, 152, 0, 0.8);
-      border: none;
-      color: white;
-      width: 35px;
-      height: 35px;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 1.2rem;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .close-notes:hover {
-      background: rgba(255, 152, 0, 1);
-      transform: rotate(90deg);
-    }
-
-    .notes-textarea {
-      flex: 1;
-      background: rgba(100, 181, 246, 0.1);
-      border: 2px solid rgba(100, 181, 246, 0.3);
-      border-radius: 10px;
-      padding: 1rem;
-      color: #e0f2f1;
-      font-family: 'Segoe UI', sans-serif;
-      font-size: 0.95rem;
-      resize: none;
-      margin-bottom: 1rem;
-      transition: all 0.3s ease;
-    }
-    .notes-textarea:focus {
-      outline: none;
-      border-color: rgba(100, 181, 246, 0.7);
-      background: rgba(100, 181, 246, 0.15);
-      box-shadow: 0 0 20px rgba(100, 181, 246, 0.3);
-    }
-
-    .notes-buttons { display: flex; flex-direction: column; gap: 0.8rem; }
-
-    .note-btn {
-      background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%);
-      color: white;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      padding: 0.8rem 1.2rem;
-      border-radius: 15px;
-      font-size: 0.95rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-weight: 600;
-      box-shadow: 0 4px 15px rgba(100, 181, 246, 0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-    }
-    .note-btn:hover:not(:disabled) {
-      background: linear-gradient(135deg, #42a5f5 0%, #2196f3 100%);
-      transform: translateY(-4px);
-      box-shadow: 0 8px 20px rgba(100, 181, 246, 0.6);
-    }
-    .note-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .note-btn.loading { background: rgba(100, 150, 200, 0.6); animation: pulse-btn 1.5s infinite; }
-    @keyframes pulse-btn { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
-
-    .notes-status {
-      background: rgba(100, 181, 246, 0.2);
-      border-left: 4px solid #fbc02d;
-      padding: 0.8rem;
-      border-radius: 5px;
-      font-size: 0.85rem;
-      color: #ffc107;
-      margin-top: 1rem;
-      min-height: 2.5rem;
-      display: flex;
-      align-items: center;
-    }
-
-    @media (max-width: 1024px) {
-      .notes-panel { width: 350px; right: -350px; }
-    }
-    @media (max-width: 768px) {
-      .notes-panel { width: 100%; right: -100%; }
-    }
-
+    /* Modal */
     .modal {
       display: none;
       position: fixed;
-      top: 0; left: 0;
+      top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
       background: rgba(0, 0, 0, 0.7);
@@ -405,7 +309,10 @@
       justify-content: center;
       animation: fadeIn 0.3s ease;
     }
-    .modal.active { display: flex; }
+
+    .modal.active {
+      display: flex;
+    }
 
     .modal-content {
       background: rgba(48, 43, 99, 0.95);
@@ -420,8 +327,21 @@
       animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    @keyframes slideUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
 
     .modal-title {
       font-size: 1.8rem;
@@ -431,7 +351,11 @@
       text-shadow: 0 0 15px rgba(100, 181, 246, 0.4);
     }
 
-    .modal-rules { display: flex; flex-direction: column; gap: 1rem; }
+    .modal-rules {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
 
     .modal-rule {
       background: rgba(100, 181, 246, 0.1);
@@ -441,130 +365,436 @@
       color: #e0f2f1;
       line-height: 1.6;
     }
-    .modal-rule strong { color: #64b5f6; }
+
+    .modal-rule strong {
+      color: #64b5f6;
+    }
 
     .button-container {
       position: absolute;
       display: flex;
       gap: 1rem;
       flex-wrap: wrap;
-      z-index: 50;
     }
-    .button-container.slide-1 { bottom: 1.5rem; left: 1.5rem; }
-    .button-container.slide-18 { bottom: 1.5rem; left: 1.5rem; }
 
-    .voice-status {
+    .button-container.slide-1 {
+      bottom: 1.5rem;
+      left: 1.5rem;
+    }
+
+    .button-container.slide-18 {
+      bottom: 1.5rem;
+      left: 1.5rem;
+    }
+
+    /* Painel de Notas */
+    .notes-panel {
+      position: fixed;
+      right: -400px;
+      top: 0;
+      width: 400px;
+      height: 100%;
+      background: rgba(48, 43, 99, 0.95);
+      backdrop-filter: blur(20px);
+      border-left: 2px solid rgba(100, 181, 246, 0.5);
+      box-shadow: -8px 0 32px rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      transition: right 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .notes-panel.active {
+      right: 0;
+    }
+
+    .notes-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.5rem;
+      border-bottom: 2px solid rgba(100, 181, 246, 0.4);
+      background: rgba(48, 43, 99, 0.6);
+    }
+
+    .notes-header h3 {
+      font-size: 1.3rem;
+      color: #64b5f6;
+      text-shadow: 0 0 10px rgba(100, 181, 246, 0.3);
+      margin: 0;
+    }
+
+    .close-btn {
+      background: transparent;
+      border: none;
+      color: #64b5f6;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      padding: 0.5rem;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .close-btn:hover {
+      background: rgba(100, 181, 246, 0.2);
+      transform: scale(1.1);
+    }
+
+    .notes-body {
+      flex: 1;
+      padding: 1.5rem;
+      overflow-y: auto;
+    }
+
+    #notes-text {
+      width: 100%;
+      height: 100%;
+      background: rgba(100, 181, 246, 0.1);
+      border: 2px solid rgba(100, 181, 246, 0.3);
+      border-radius: 10px;
+      padding: 1rem;
+      color: #e0f2f1;
+      font-size: 0.95rem;
+      font-family: 'Segoe UI', sans-serif;
+      resize: none;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    #notes-text:focus {
+      border-color: #64b5f6;
+      background: rgba(100, 181, 246, 0.15);
+      box-shadow: 0 0 15px rgba(100, 181, 246, 0.3);
+    }
+
+    #notes-text::placeholder {
+      color: #7c8a9f;
+    }
+
+    .notes-footer {
+      display: flex;
+      gap: 0.8rem;
+      padding: 1.5rem;
+      border-top: 2px solid rgba(100, 181, 246, 0.4);
+      background: rgba(48, 43, 99, 0.6);
+      flex-wrap: wrap;
+    }
+
+    .btn-small {
+      background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%);
+      color: white;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      padding: 0.6rem 1rem;
+      border-radius: 18px;
       font-size: 0.85rem;
-      color: #a0c4ff;
-      padding: 0.35rem 0.6rem;
-      border: 1px solid rgba(100, 181, 246, 0.35);
-      border-radius: 999px;
-      background: rgba(48, 43, 99, 0.35);
-      backdrop-filter: blur(10px);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(100, 181, 246, 0.4);
+      flex: 1;
+      min-width: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+    }
+
+    .btn-small:hover {
+      background: linear-gradient(135deg, #42a5f5 0%, #2196f3 100%);
+      transform: translateY(-4px);
+      box-shadow: 0 6px 20px rgba(100, 181, 246, 0.6);
+    }
+
+    .btn-small:active {
+      transform: translateY(-1px);
     }
 
     @media (max-width: 768px) {
-      .controls { gap: 0.8rem; }
-      .modal-content { margin: 1rem; max-width: 90%; }
-      .button-container { gap: 0.5rem; }
+      .controls {
+        gap: 0.8rem;
+      }
+
+      .modal-content {
+        margin: 1rem;
+        max-width: 90%;
+      }
+
+      .button-container {
+        gap: 0.5rem;
+      }
+
+      .notes-panel {
+        width: 100%;
+        right: -100%;
+      }
+
+      .btn-small {
+        min-width: 80px;
+        font-size: 0.75rem;
+        padding: 0.5rem 0.8rem;
+      }
     }
   </style>
-
+  <style>body { box-sizing: border-box; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
-  <script async src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-</head>
-
-<body class="h-full">
+ </head>
+ <body class="h-full">
   <div class="app-wrapper">
-    <div class="header">
-      <h1 class="title" id="presentation-title">Aula de Anatomia</h1>
+   <div class="header">
+    <h1 class="title" id="presentation-title">Aula de Anatomia</h1>
+   </div>
+   <div class="content">
+    <div class="slide-container" id="slide-container">
+     <div class="placeholder">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">
+       📊
+      </div>
+      <div>
+       Carregando slide...
+      </div>
+     </div>
+    </div><!-- Botões Slide 1 -->
+    <div class="button-container slide-1" id="slide-1-buttons" style="display: none;">
+     <button class="btn btn-orange" id="cronograma-btn" onclick="openCronograma()">📅 Cronograma</button> <button class="btn btn-purple" id="normas-btn" onclick="openNormas()">⚖️ Normas Lab</button>
+    </div><!-- Botões Slide 18 -->
+    <div class="button-container slide-18" id="slide-18-buttons" style="display: none;">
+     <button class="btn btn-orange" id="cronograma-btn-18" onclick="openTestePage()">📅 Cronograma</button> <button class="btn btn-purple" id="teste-btn" onclick="openTeste()">🧪 Teste seus Conhecimentos</button>
     </div>
-
-    <div class="content">
-      <div class="slide-container" id="slide-container">
-        <div class="placeholder">
-          <div style="font-size: 3rem; margin-bottom: 1rem;">📊</div>
-          <div>Carregando slide...</div>
-        </div>
-      </div>
-
-      <!-- Botões Slide 1 -->
-      <div class="button-container slide-1" id="slide-1-buttons" style="display: none;">
-        <button class="btn btn-orange" id="cronograma-btn" onclick="openCronograma()">📅 Cronograma</button>
-        <button class="btn btn-purple" id="normas-btn" onclick="openNormas()">⚖️ Normas Lab</button>
-      </div>
-
-      <!-- Botões Slide 18 -->
-      <div class="button-container slide-18" id="slide-18-buttons" style="display: none;">
-        <button class="btn btn-orange" id="cronograma-btn-18" onclick="openTestePage()">📅 Cronograma</button>
-        <button class="btn btn-purple" id="teste-btn" onclick="openTeste()">🧪 Teste seus Conhecimentos</button>
-      </div>
-
-      <div class="keyboard-hint">Use ← →, clique na imagem, ou voz</div>
+    <div class="keyboard-hint">
+     Use ← → ou clique nos botões
     </div>
-
-    <!-- Modal de Normas -->
-    <div class="modal" id="normas-modal" onclick="closeNormasIfBackdrop(event)">
-      <div class="modal-content" onclick="event.stopPropagation()">
-        <h2 class="modal-title">⚖️ Normas do Laboratório</h2>
-        <div class="modal-rules">
-          <div class="modal-rule"><strong>1. Segurança:</strong> Use sempre EPI (Equipamento de Proteção Individual) adequado ao entrar no laboratório.</div>
-          <div class="modal-rule"><strong>2. Limpeza:</strong> Mantenha o espaço limpo e organizado. Limpe suas ferramentas após usar.</div>
-          <div class="modal-rule"><strong>3. Respeito:</strong> Respeite os colegas e o professor. Trabalhe em silêncio durante as aulas.</div>
-          <div class="modal-rule"><strong>4. Responsabilidade:</strong> Reporte qualquer dano a equipamentos imediatamente.</div>
-          <div class="modal-rule"><strong>5. Assiduidade:</strong> Chegue no horário e informe faltas previamente quando possível.</div>
-          <div class="modal-rule"><strong>6. Ética e Respeito:</strong> O cadáver deve ser tratado com o máximo respeito. É estritamente proibido o uso de celulares para fotos ou vídeos sem autorização expressa.</div>
-        </div>
+   </div><!-- Modal de Normas -->
+   <div class="modal" id="normas-modal" onclick="closeNormasIfBackdrop(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+     <h2 class="modal-title">⚖️ Normas do Laboratório</h2>
+     <div class="modal-rules">
+      <div class="modal-rule">
+       <strong>1. Segurança:</strong> Use sempre EPI (Equipamento de Proteção Individual) adequado ao entrar no laboratório.
       </div>
+      <div class="modal-rule">
+       <strong>2. Limpeza:</strong> Mantenha o espaço limpo e organizado. Limpe suas ferramentas após usar.
+      </div>
+      <div class="modal-rule">
+       <strong>3. Respeito:</strong> Respeite os colegas e o professor. Trabalhe em silêncio durante as aulas.
+      </div>
+      <div class="modal-rule">
+       <strong>4. Responsabilidade:</strong> Reporte qualquer dano a equipamentos imediatamente.
+      </div>
+      <div class="modal-rule">
+       <strong>5. Assiduidade:</strong> Chegue no horário e informe faltas previamente quando possível.
+      </div>
+      <div class="modal-rule">
+       <strong>6. Ética e Respeito:</strong> O cadáver deve ser tratado com o máximo respeito. É estritamente proibido o uso de celulares para fotos ou vídeos sem autorização expressa.
+      </div>
+     </div>
     </div>
-
-    <div class="controls">
-      <button class="btn" id="prev-btn" type="button"><span>← Anterior</span></button>
-
-      <div class="slide-info">
-        <span class="slide-number"><span id="current-slide">1</span> / <span id="total-slides">37</span></span>
-      </div>
-
-      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
-
-      <button class="btn" id="next-btn" type="button"><span>Próximo →</span></button>
-
-      <button class="btn btn-purple" id="notes-btn" type="button" onclick="toggleNotes()">📝 Notas</button>
-
-      <!-- TELA CHEIA -->
-      <button class="btn btn-purple" id="fullscreen-btn" type="button">⛶ Tela cheia</button>
-      <span class="voice-status" id="fs-status">Tela: normal</span>
-
-      <!-- VOZ -->
-      <button class="btn btn-orange" id="voice-btn" type="button">🎙️ Ativar voz</button>
-      <span class="voice-status" id="voice-status">Voz: desligada</span>
+   </div>
+   <div class="controls"><button class="btn" id="prev-btn"> <span>← Anterior</span> </button>
+    <div class="slide-info"><span class="slide-number"><span id="current-slide">1</span> / <span id="total-slides">37</span></span>
     </div>
-
-    <!-- Painel de Notas -->
-    <div class="notes-panel" id="notes-panel">
-      <div class="notes-header">
-        <h3 class="notes-title">📝 Notas - Slide <span id="notes-slide-number">1</span></h3>
-        <button class="close-notes" type="button" onclick="toggleNotes()">✕</button>
-      </div>
-
-      <textarea class="notes-textarea" id="notes-textarea" placeholder="Escreva suas notas aqui..."></textarea>
-
-      <div class="notes-buttons">
-        <button class="note-btn" id="save-notes-btn" type="button" onclick="saveNotes()">💾 Salvar Notas</button>
-        <button class="note-btn" id="read-notes-btn" type="button" onclick="readNotes()">🔊 Ler Notas</button>
-        <button class="note-btn" id="ocr-btn" type="button" onclick="extractTextFromSlide()">📸 Extrair Texto OCR</button>
-        <button class="note-btn" id="clear-notes-btn" type="button" onclick="clearNotes()">🗑️ Limpar Notas</button>
-      </div>
-
-      <div class="notes-status" id="notes-status">Pronto para anotar</div>
+    <div class="progress-bar">
+     <div class="progress-fill" id="progress-fill"></div>
+    </div><button class="btn btn-purple" id="notes-btn" onclick="toggleNotesPanel()">📝 Notas</button> <button class="btn" id="voice-btn" onclick="toggleVoiceCommand()">🎤 Ativar Voz</button><button class="btn" id="next-btn"> <span>Próximo →</span> </button>
+   </div><!-- Painel de Notas -->
+   <div class="notes-panel" id="notes-panel">
+    <div class="notes-header">
+     <h3>📝 Notas do Slide <span id="notes-slide-number">1</span></h3><button class="close-btn" onclick="toggleNotesPanel()">✕</button>
     </div>
+    <div class="notes-body"><textarea id="notes-text" placeholder="Digite suas anotações aqui..."></textarea>
+    </div>
+    <div class="notes-footer"><button class="btn-small" onclick="extractSlideText()">📄 Extrair Texto</button> <button class="btn-small" onclick="readNotes()">🔊 Ler Notas</button> <button class="btn-small" onclick="clearNotes()">🗑️ Limpar</button>
+    </div>
+   </div>
   </div>
-
   <script>
     let currentSlide = 1;
     let totalSlides = 37;
-    let config = { presentation_title: 'Aula de Anatomia' };
-    const defaultConfig = { presentation_title: 'Aula de Anatomia' };
+    let config = {
+      presentation_title: 'Aula de Anatomia'
+    };
+    let voiceActive = false;
+    let recognition = null;
+
+    const defaultConfig = {
+      presentation_title: 'Aula de Anatomia'
+    };
+
+    // Textos dos slides para extração
+    const slideTexts = {
+      1: "Slide 1 - Introdução à Anatomia",
+      2: "Slide 2 - Conceitos Básicos",
+      3: "Slide 3 - Sistemas do Corpo",
+      4: "Slide 4 - Sistema Esquelético",
+      5: "Slide 5 - Ossos",
+      6: "Slide 6 - Articulações",
+      7: "Slide 7 - Sistema Muscular",
+      8: "Slide 8 - Tipos de Músculos",
+      9: "Slide 9 - Contração Muscular",
+      10: "Slide 10 - Sistema Circulatório",
+      11: "Slide 11 - Coração",
+      12: "Slide 12 - Vasos Sanguíneos",
+      13: "Slide 13 - Sistema Respiratório",
+      14: "Slide 14 - Pulmões",
+      15: "Slide 15 - Trocas Gasosas",
+      16: "Slide 16 - Sistema Nervoso",
+      17: "Slide 17 - Encéfalo",
+      18: "Slide 18 - Medula Espinal",
+      19: "Slide 19 - Nervos Periféricos",
+      20: "Slide 20 - Sistema Digestório",
+      21: "Slide 21 - Boca e Esôfago",
+      22: "Slide 22 - Estômago",
+      23: "Slide 23 - Intestinos",
+      24: "Slide 24 - Fígado e Pâncreas",
+      25: "Slide 25 - Sistema Urinário",
+      26: "Slide 26 - Rins",
+      27: "Slide 27 - Bexiga",
+      28: "Slide 28 - Sistema Endócrino",
+      29: "Slide 29 - Glândulas",
+      30: "Slide 30 - Hormônios",
+      31: "Slide 31 - Sistema Imunológico",
+      32: "Slide 32 - Células de Defesa",
+      33: "Slide 33 - Órgãos Linfoides",
+      34: "Slide 34 - Sistema Reprodutor",
+      35: "Slide 35 - Reprodução",
+      36: "Slide 36 - Desenvolvimento",
+      37: "Slide 37 - Conclusão"
+    };
+
+    // Carregar notas do localStorage
+    function loadNotes() {
+      const notes = localStorage.getItem(`notes-slide-${currentSlide}`);
+      document.getElementById('notes-text').value = notes || '';
+    }
+
+    // Salvar notas no localStorage
+    function saveNotes() {
+      const notes = document.getElementById('notes-text').value;
+      localStorage.setItem(`notes-slide-${currentSlide}`, notes);
+    }
+
+    // Alternar painel de notas
+    function toggleNotesPanel() {
+      const panel = document.getElementById('notes-panel');
+      panel.classList.toggle('active');
+      if (panel.classList.contains('active')) {
+        loadNotes();
+        document.getElementById('notes-text').focus();
+      } else {
+        saveNotes();
+      }
+    }
+
+    // Extrair texto do slide
+    function extractSlideText() {
+      const text = slideTexts[currentSlide] || `Texto do Slide ${currentSlide}`;
+      const notesArea = document.getElementById('notes-text');
+      const currentNotes = notesArea.value;
+      
+      if (currentNotes.trim()) {
+        notesArea.value = currentNotes + '\n\n--- Texto Extraído ---\n' + text;
+      } else {
+        notesArea.value = text;
+      }
+      
+      notesArea.focus();
+      saveNotes();
+    }
+
+    // Ler notas em voz alta
+    function readNotes() {
+      const notes = document.getElementById('notes-text').value;
+      
+      if (!notes.trim()) {
+        alert('Nenhuma nota para ler!');
+        return;
+      }
+
+      const utterance = new SpeechSynthesisUtterance(notes);
+      utterance.lang = 'pt-BR';
+      utterance.rate = 0.9;
+      utterance.pitch = 1;
+      
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // Limpar notas
+    function clearNotes() {
+      if (confirm('Tem certeza que deseja limpar todas as notas deste slide?')) {
+        document.getElementById('notes-text').value = '';
+        saveNotes();
+      }
+    }
+
+    // Alternar reconhecimento de voz
+    function toggleVoiceCommand() {
+      const btn = document.getElementById('voice-btn');
+      
+      if (!recognition) {
+        initVoiceRecognition();
+      }
+
+      if (voiceActive) {
+        recognition.stop();
+        voiceActive = false;
+        btn.style.background = 'linear-gradient(135deg, #ff9800 0%, #ff6f00 100%)';
+        btn.textContent = '🎤 Ativar Voz';
+      } else {
+        recognition.start();
+        voiceActive = true;
+        btn.style.background = 'linear-gradient(135deg, #4caf50 0%, #2e7d32 100%)';
+        btn.textContent = '🎤 Voz Ativa...';
+      }
+    }
+
+    // Inicializar reconhecimento de voz
+    function initVoiceRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+      if (!SpeechRecognition) {
+        alert('Seu navegador não suporta reconhecimento de voz.');
+        return;
+      }
+
+      recognition = new SpeechRecognition();
+      recognition.lang = 'pt-BR';
+      recognition.continuous = true;
+      recognition.interimResults = false;
+
+      recognition.onstart = () => {
+        const btn = document.getElementById('voice-btn');
+        btn.style.background = 'linear-gradient(135deg, #4caf50 0%, #2e7d32 100%)';
+        btn.textContent = '🎤 Voz Ativa...';
+      };
+
+      recognition.onresult = (event) => {
+        const command = event.results[event.results.length - 1][0].transcript.toLowerCase();
+        console.log("Comando recebido:", command);
+
+        if (command.includes('próximo') || command.includes('avançar') || command.includes('passar')) {
+          nextSlide();
+        } else if (command.includes('anterior') || command.includes('voltar') || command.includes('retroceder')) {
+          previousSlide();
+        } else if (command.includes('parar') || command.includes('stop') || command.includes('silêncio')) {
+          toggleVoiceCommand();
+        }
+      };
+
+      recognition.onerror = (event) => {
+        console.error("Erro no reconhecimento de voz:", event.error);
+      };
+
+      recognition.onend = () => {
+        if (voiceActive) {
+          recognition.start();
+        }
+      };
+    }
 
     async function initElement() {
       if (!window.elementSdk) return;
@@ -573,7 +803,7 @@
         defaultConfig,
         onConfigChange: async (newConfig) => {
           config = newConfig;
-          document.getElementById('presentation-title').textContent =
+          document.getElementById('presentation-title').textContent = 
             config.presentation_title || defaultConfig.presentation_title;
         },
         mapToCapabilities: () => ({
@@ -592,15 +822,14 @@
       const container = document.getElementById('slide-container');
       container.style.opacity = '0';
       container.style.transition = 'opacity 0.15s ease';
-
+      
       setTimeout(() => {
         container.innerHTML = '';
         const img = document.createElement('img');
         img.src = `assets/slide${currentSlide}.jpg`;
         img.alt = `Slide ${currentSlide}`;
         img.className = 'slide-image';
-        img.loading = 'eager';
-
+        img.loading = 'lazy';
         img.onerror = function() {
           console.error('Imagem não carregada:', this.src);
           container.innerHTML = `
@@ -614,11 +843,9 @@
           `;
           container.style.opacity = '1';
         };
-
         img.onload = function() {
           container.style.opacity = '1';
         };
-
         container.appendChild(img);
       }, 150);
     }
@@ -626,6 +853,7 @@
     function updateUI() {
       document.getElementById('current-slide').textContent = currentSlide;
       document.getElementById('total-slides').textContent = totalSlides;
+      document.getElementById('notes-slide-number').textContent = currentSlide;
 
       const progress = (currentSlide / totalSlides) * 100;
       document.getElementById('progress-fill').style.width = progress + '%';
@@ -633,19 +861,26 @@
       document.getElementById('prev-btn').disabled = currentSlide === 1;
       document.getElementById('next-btn').disabled = currentSlide === totalSlides;
 
+      // Mostrar/esconder botões específicos dos slides
       document.getElementById('slide-1-buttons').style.display = currentSlide === 1 ? 'flex' : 'none';
       document.getElementById('slide-18-buttons').style.display = currentSlide === 18 ? 'flex' : 'none';
 
       renderSlide();
-      refreshNotesPanelIfOpen();
+      
+      // Carregar notas ao mudar de slide
+      if (document.getElementById('notes-panel').classList.contains('active')) {
+        loadNotes();
+      }
     }
 
     function openCronograma() {
       window.open('https://pinheiro767.github.io/Turma-seg-2026/', '_blank', 'noopener,noreferrer');
     }
+
     function openTestePage() {
       window.open('https://pinheiro767.github.io/Inicio-anato-2026/', '_blank', 'noopener,noreferrer');
     }
+
     function openTeste() {
       window.open('https://pinheiro767.github.io/Inicio-anato-2026/', '_blank', 'noopener,noreferrer');
     }
@@ -653,12 +888,23 @@
     function openNormas() {
       document.getElementById('normas-modal').classList.add('active');
     }
+
     function closeNormas() {
       document.getElementById('normas-modal').classList.remove('active');
     }
+
     function closeNormasIfBackdrop(event) {
-      if (event.target.id === 'normas-modal') closeNormas();
+      if (event.target.id === 'normas-modal') {
+        closeNormas();
+      }
     }
+
+    // Fechar modal com ESC
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeNormas();
+      }
+    });
 
     function nextSlide() {
       if (currentSlide < totalSlides) {
@@ -666,6 +912,7 @@
         updateUI();
       }
     }
+
     function previousSlide() {
       if (currentSlide > 1) {
         currentSlide--;
@@ -676,345 +923,29 @@
     document.getElementById('prev-btn').addEventListener('click', previousSlide);
     document.getElementById('next-btn').addEventListener('click', nextSlide);
 
-    // Teclas: setas, ESC fecha modal, F tela cheia
+    // Navegação por teclado
     document.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowRight') nextSlide();
       if (e.key === 'ArrowLeft') previousSlide();
-      if (e.key === 'Escape') closeNormas();
-      if (e.key.toLowerCase() === 'f') toggleFullscreen();
     });
 
-    // =========================
-    // VOZ (SpeechRecognition)
-    // =========================
-    let recognition = null;
-    let voiceEnabled = false;
-    let stoppingByUser = false;
+    // Inicializar
+    initElement();
+    updateUI();
 
-    const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-    function setVoiceStatus(msg) {
-      const el = document.getElementById('voice-status');
-      if (el) el.textContent = msg;
-    }
-
-    function updateStatus(msg) {
-      const el = document.getElementById('notes-status');
-      if (el) el.textContent = msg;
-    }
-
-    async function requestMicPermission() {
-      try {
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return true;
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        stream.getTracks().forEach(t => t.stop());
-        return true;
-      } catch (e) {
-        console.error("Permissão de microfone negada:", e);
-        return false;
+    // Salvar notas quando fechar o painel
+    document.addEventListener('beforeunload', () => {
+      if (document.getElementById('notes-text').value) {
+        saveNotes();
       }
-    }
-
-    function speak(text) {
-      try {
-        if (!('speechSynthesis' in window)) return;
-        window.speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(text);
-        u.lang = 'pt-BR';
-        u.rate = 1.0;
-        u.pitch = 1.0;
-        window.speechSynthesis.speak(u);
-      } catch (e) {
-        console.warn("Falha no speak:", e);
-      }
-    }
-
-    function startVoice() {
-      if (!SpeechRecognitionCtor) {
-        setVoiceStatus("Voz: indisponível");
-        updateStatus("❌ Este navegador não suporta comando de voz.");
-        return;
-      }
-      if (recognition && voiceEnabled) return;
-
-      recognition = new SpeechRecognitionCtor();
-      recognition.lang = 'pt-BR';
-      recognition.continuous = true;
-      recognition.interimResults = false;
-
-      recognition.onstart = () => {
-        setVoiceStatus("Voz: ouvindo…");
-        updateStatus("🎙️ Voz ativa (diga: próximo, anterior, parar)");
-      };
-
-      recognition.onresult = (event) => {
-        const last = event.results[event.results.length - 1];
-        const command = (last?.[0]?.transcript || "").toLowerCase().trim();
-        if (!command) return;
-
-        console.log("Comando recebido:", command);
-
-        if (command.includes('próximo') || command.includes('avançar') || command.includes('passar')) {
-          nextSlide();
-          speak("Próximo slide");
-        } else if (command.includes('anterior') || command.includes('voltar') || command.includes('trás')) {
-          previousSlide();
-          speak("Slide anterior");
-        } else if (command.includes('parar') || command.includes('sair') || command.includes('desativar')) {
-          speak("Voz desativada");
-          stopVoice(true);
-          const vb = document.getElementById('voice-btn');
-          if (vb) vb.textContent = "🎙️ Ativar voz";
-        }
-      };
-
-      recognition.onerror = (e) => {
-        console.error("SpeechRecognition erro:", e);
-        if (e.error === "not-allowed" || e.error === "service-not-allowed") {
-          setVoiceStatus("Voz: permissão negada");
-          updateStatus("❌ Microfone bloqueado. Permita o microfone no navegador.");
-          voiceEnabled = false;
-          return;
-        }
-        setVoiceStatus("Voz: erro (" + e.error + ")");
-        updateStatus("⚠️ Erro no comando de voz: " + e.error);
-      };
-
-      recognition.onend = () => {
-        if (voiceEnabled && !stoppingByUser) {
-          try { recognition.start(); }
-          catch (e) {
-            console.error("Falha ao reiniciar voz:", e);
-            setVoiceStatus("Voz: falha");
-          }
-        } else {
-          setVoiceStatus("Voz: desligada");
-        }
-      };
-
-      try {
-        recognition.start();
-        voiceEnabled = true;
-        stoppingByUser = false;
-      } catch (e) {
-        console.error("Falha ao iniciar SpeechRecognition:", e);
-        setVoiceStatus("Voz: não iniciou");
-        updateStatus("❌ Não foi possível iniciar o comando de voz.");
-        voiceEnabled = false;
-      }
-    }
-
-    function stopVoice(byUser = false) {
-      stoppingByUser = byUser;
-      voiceEnabled = false;
-      try {
-        if (recognition) recognition.stop();
-      } catch (e) {
-        console.warn("Falha ao parar voz:", e);
-      }
-      setVoiceStatus("Voz: desligada");
-      if (byUser) updateStatus("🔇 Voz desativada.");
-    }
-
-    document.getElementById('voice-btn').addEventListener('click', async () => {
-      const btn = document.getElementById('voice-btn');
-
-      if (voiceEnabled) {
-        stopVoice(true);
-        btn.textContent = "🎙️ Ativar voz";
-        return;
-      }
-
-      const ok = await requestMicPermission();
-      if (!ok) {
-        setVoiceStatus("Voz: permissão negada");
-        updateStatus("❌ Permita o microfone no navegador para usar voz.");
-        return;
-      }
-
-      startVoice();
-      btn.textContent = "🔇 Desativar voz";
     });
 
-    // =========================
-    // TELA CHEIA
-    // =========================
-    function isFullscreen() {
-      return !!(document.fullscreenElement || document.webkitFullscreenElement);
-    }
-
-    async function enterFullscreen() {
-      const el = document.documentElement;
-      if (el.requestFullscreen) return el.requestFullscreen();
-      if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen();
-      throw new Error("Fullscreen não suportado");
-    }
-
-    async function exitFullscreen() {
-      if (document.exitFullscreen) return document.exitFullscreen();
-      if (document.webkitExitFullscreen) return document.webkitExitFullscreen();
-      throw new Error("Exit fullscreen não suportado");
-    }
-
-    function setFullscreenUI() {
-      const btn = document.getElementById('fullscreen-btn');
-      const st = document.getElementById('fs-status');
-      if (!btn) return;
-
-      if (isFullscreen()) {
-        btn.textContent = "⛶ Sair da tela cheia";
-        if (st) st.textContent = "Tela: cheia";
-      } else {
-        btn.textContent = "⛶ Tela cheia";
-        if (st) st.textContent = "Tela: normal";
+    // Salvar notas periodicamente
+    setInterval(() => {
+      if (document.getElementById('notes-panel').classList.contains('active')) {
+        saveNotes();
       }
-    }
-
-    async function toggleFullscreen() {
-      try {
-        if (isFullscreen()) await exitFullscreen();
-        else await enterFullscreen();
-      } catch (e) {
-        console.warn("Fullscreen falhou:", e);
-        updateStatus("⚠️ Não foi possível ativar tela cheia neste navegador.");
-      } finally {
-        setFullscreenUI();
-      }
-    }
-
-    document.getElementById('fullscreen-btn').addEventListener('click', toggleFullscreen);
-    document.addEventListener('fullscreenchange', setFullscreenUI);
-    document.addEventListener('webkitfullscreenchange', setFullscreenUI);
-
-    // =========================
-    // NOTAS (por slide)
-    // =========================
-    function notesKey(slideNum) {
-      return `anato_notes_slide_${slideNum}`;
-    }
-
-    function toggleNotes() {
-      const panel = document.getElementById('notes-panel');
-      const active = panel.classList.toggle('active');
-
-      if (active) {
-        document.getElementById('notes-slide-number').textContent = currentSlide;
-        loadNotes();
-        updateStatus("Pronto para anotar");
-      }
-    }
-
-    function loadNotes() {
-      const ta = document.getElementById('notes-textarea');
-      const saved = localStorage.getItem(notesKey(currentSlide)) || "";
-      ta.value = saved;
-      document.getElementById('notes-slide-number').textContent = currentSlide;
-    }
-
-    function saveNotes() {
-      const ta = document.getElementById('notes-textarea');
-      localStorage.setItem(notesKey(currentSlide), ta.value || "");
-      updateStatus("✅ Notas salvas para o slide " + currentSlide);
-      speak("Notas salvas");
-    }
-
-    function clearNotes() {
-      const ta = document.getElementById('notes-textarea');
-      ta.value = "";
-      localStorage.removeItem(notesKey(currentSlide));
-      updateStatus("🗑️ Notas limpas para o slide " + currentSlide);
-      speak("Notas limpas");
-    }
-
-    function readNotes() {
-      const ta = document.getElementById('notes-textarea');
-      const txt = (ta.value || "").trim();
-      if (!txt) {
-        updateStatus("⚠️ Não há notas para ler neste slide.");
-        speak("Não há notas para ler");
-        return;
-      }
-      updateStatus("🔊 Lendo notas...");
-      speak(txt);
-    }
-
-    function refreshNotesPanelIfOpen() {
-      const panel = document.getElementById('notes-panel');
-      if (panel.classList.contains('active')) {
-        document.getElementById('notes-slide-number').textContent = currentSlide;
-        loadNotes();
-      }
-    }
-
-    // =========================
-    // OCR (Tesseract)
-    // =========================
-    async function extractTextFromSlide() {
-      const btn = document.getElementById('ocr-btn');
-      btn.classList.add('loading');
-      btn.disabled = true;
-      updateStatus("📸 OCR: processando imagem do slide " + currentSlide + "...");
-
-      try {
-        if (!window.Tesseract) {
-          updateStatus("❌ OCR indisponível: Tesseract não carregou.");
-          return;
-        }
-
-        const imgUrl = `assets/slide${currentSlide}.jpg`;
-        const resp = await fetch(imgUrl, { cache: 'no-store' });
-        if (!resp.ok) throw new Error("Não consegui carregar a imagem do slide para OCR.");
-
-        const blob = await resp.blob();
-
-        const { data } = await window.Tesseract.recognize(blob, 'por', {
-          logger: m => {
-            if (m.status === 'recognizing text') {
-              const pct = Math.round((m.progress || 0) * 100);
-              updateStatus(`📸 OCR: reconhecendo texto... ${pct}%`);
-            }
-          }
-        });
-
-        const text = (data?.text || "").trim();
-        if (!text) {
-          updateStatus("⚠️ OCR não encontrou texto legível neste slide.");
-          speak("Não encontrei texto legível");
-          return;
-        }
-
-        const ta = document.getElementById('notes-textarea');
-        const header = `\n\n--- OCR Slide ${currentSlide} ---\n`;
-        ta.value = (ta.value || "") + header + text;
-
-        updateStatus("✅ OCR concluído! Texto adicionado às notas.");
-        speak("Texto extraído e adicionado às notas");
-      } catch (e) {
-        console.error("Erro OCR:", e);
-        updateStatus("❌ Erro no OCR: " + (e?.message || "desconhecido"));
-      } finally {
-        btn.classList.remove('loading');
-        btn.disabled = false;
-      }
-    }
-
-    // =========================
-    // INICIALIZAÇÃO
-    // =========================
-    window.addEventListener('load', async () => {
-      await initElement();
-      document.getElementById('presentation-title').textContent =
-        config.presentation_title || defaultConfig.presentation_title;
-
-      // Clique na imagem para avançar
-      document.getElementById('slide-container').addEventListener('click', () => {
-        if (currentSlide < totalSlides) nextSlide();
-      });
-
-      updateUI();
-      setVoiceStatus("Voz: desligada");
-      setFullscreenUI();
-    });
+    }, 3000);
   </script>
-</body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d22f00c26fdad09',t:'MTc3MTgxMDAxNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
