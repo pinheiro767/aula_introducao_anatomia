@@ -1,164 +1,262 @@
 <!doctype html>
 <html lang="pt-br" class="h-full">
-<head>
+ <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Apresentador de Anatomia - Prof. Cláudia Pinheiro</title>
-  
   <script src="/_sdk/element_sdk.js"></script>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; width: 100%; }
     body {
       font-family: 'Segoe UI', sans-serif;
       background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
-      color: #fff; overflow: hidden; height: 100vh;
+      color: #fff; overflow: hidden; 
     }
-    .app-wrapper { display: flex; flex-direction: column; height: 100%; }
+    .app-wrapper { display: flex; flex-direction: column; height: 100%; width: 100%; }
     .header { background: rgba(48, 43, 99, 0.8); padding: 1.2rem; border-bottom: 2px solid #64b5f6; text-align: center; }
-    .content { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; position: relative; }
-    .slide-container { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); border-radius: 20px; border: 1px solid rgba(100, 181, 246, 0.3); }
-    .slide-image { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 10px; }
-    .controls { display: flex; align-items: center; justify-content: center; gap: 2rem; padding: 1.5rem; background: rgba(48, 43, 99, 0.9); border-top: 2px solid #64b5f6; }
+    .title { font-size: clamp(1.5rem, 4vw, 2.2rem); font-weight: 700; color: #64b5f6; text-shadow: 0 0 15px rgba(100, 181, 246, 0.5); }
+    .content { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem; position: relative; }
+    .slide-container { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); border-radius: 20px; border: 2px solid rgba(100, 181, 246, 0.3); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); overflow: hidden; }
+    .slide-image { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 10px; animation: slideIn 0.5s ease-out; }
+    @keyframes slideIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    .controls { display: flex; align-items: center; justify-content: center; gap: 1.5rem; padding: 1.5rem; background: rgba(48, 43, 99, 0.9); border-top: 2px solid #64b5f6; flex-wrap: wrap; }
     .btn { background: #42a5f5; color: white; padding: 0.8rem 1.5rem; border-radius: 25px; font-weight: bold; cursor: pointer; border: none; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-    .btn:hover { transform: translateY(-3px); background: #2196f3; }
-    .notes-panel { position: fixed; right: -420px; top: 0; width: 420px; height: 100%; background: #1a1a2e; border-left: 2px solid #64b5f6; transition: 0.4s ease; z-index: 1000; display: flex; flex-direction: column; }
+    .btn:hover:not(:disabled) { transform: translateY(-3px); background: #2196f3; box-shadow: 0 6px 20px rgba(100, 181, 246, 0.6); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-voice-active { background: #4caf50 !important; }
+    .btn-voice-inactive { background: #ff9800 !important; }
+    
+    /* Panel de Notas */
+    .notes-panel { 
+      position: fixed; right: -420px; top: 0; width: 420px; height: 100%; 
+      background: rgba(15, 12, 41, 0.95); border-left: 2px solid #b366ff;
+      transition: 0.4s ease; z-index: 1000; display: flex; flex-direction: column;
+      backdrop-filter: blur(20px); box-shadow: -8px 0 32px rgba(0, 0, 0, 0.5);
+    }
     .notes-panel.active { right: 0; }
-    #notes-text { flex: 1; background: #0f0c29; color: #fff; padding: 20px; border: none; outline: none; resize: none; margin: 15px; border-radius: 10px; font-size: 1rem; border: 1px solid #333; }
-    .progress-bar { width: 200px; height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden; }
-    .progress-fill { height: 100%; background: #ffc107; width: 0%; transition: 0.4s; }
-    .btn-container { position: absolute; bottom: 30px; left: 30px; display: flex; gap: 12px; z-index: 100; flex-wrap: wrap; }
+    .notes-header { padding: 1.5rem; border-bottom: 1px solid rgba(100, 181, 246, 0.4); display: flex; justify-content: space-between; align-items: center; background: rgba(100, 181, 246, 0.1); }
+    .notes-header h3 { font-size: 1.1rem; color: #64b5f6; }
+    .notes-close { color: #64b5f6; background: none; border: none; cursor: pointer; font-size: 1.5rem; transition: 0.2s; }
+    .notes-close:hover { color: #42a5f5; }
+    #notes-text { flex: 1; background: rgba(15, 12, 41, 0.9); color: #fff; padding: 1.5rem; border: none; outline: none; resize: none; font-size: 0.95rem; border-top: 1px solid rgba(100, 181, 246, 0.2); font-family: 'Segoe UI', sans-serif; line-height: 1.6; }
+    #notes-text::placeholder { color: rgba(255, 255, 255, 0.4); }
+    .notes-buttons { padding: 1.2rem; display: flex; gap: 8px; flex-wrap: wrap; background: rgba(100, 181, 246, 0.05); border-top: 1px solid rgba(100, 181, 246, 0.2); }
+    .notes-btn { flex: 1; min-width: 110px; padding: 0.7rem; font-size: 0.8rem; border-radius: 20px; border: none; cursor: pointer; font-weight: 600; transition: 0.3s; color: white; }
+    .notes-btn-primary { background: #b366ff; }
+    .notes-btn-primary:hover { background: #9d4edd; transform: translateY(-2px); }
+    .notes-btn-success { background: #4caf50; }
+    .notes-btn-success:hover { background: #45a049; transform: translateY(-2px); }
+    .notes-btn-danger { background: #f44336; }
+    .notes-btn-danger:hover { background: #da190b; transform: translateY(-2px); }
+
+    .slide-info { display: flex; align-items: center; gap: 0.5rem; }
+    .progress-bar { width: 200px; height: 8px; background: rgba(100, 181, 246, 0.2); border-radius: 5px; overflow: hidden; border: 1px solid rgba(100, 181, 246, 0.4); }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #ffc107, #ff9800); width: 0%; transition: 0.4s; }
+    .placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(100, 200, 255, 0.1), rgba(255, 100, 200, 0.1)); border-radius: 12px; font-size: 1.2rem; color: #a0c4ff; }
+
+    @media (max-width: 768px) {
+      .notes-panel { width: 80vw; right: -80vw; }
+      .controls { gap: 0.8rem; }
+      .btn { padding: 0.6rem 1rem; font-size: 0.85rem; }
+    }
   </style>
-</head>
-<body>
-
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body>
   <div class="app-wrapper">
-    <div class="header"><h1>Introdução à Anatomia Humana</h1></div>
-    <div class="content">
-      <div class="slide-container" id="slide-container"></div>
-      <div class="btn-container" id="dynamic-btns"></div>
+   <div class="header">
+    <h1 class="title" id="presentation-title">Introdução à Anatomia Humana</h1>
+   </div>
+   <div class="content">
+    <div class="slide-container" id="slide-container">
+     <div class="placeholder">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">
+       📊
+      </div>
+      <div>
+       Carregando slide...
+      </div>
+     </div>
     </div>
-    <div class="controls">
-      <button class="btn" onclick="previousSlide()">← Anterior</button>
-      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
-      <div id="slide-num" style="font-weight:bold;">1 / 37</div>
-      <button class="btn" style="background:#9c27b0" onclick="toggleNotes()">📝 Notas</button>
-      <button class="btn" id="voice-btn" style="background:#ff9800" onclick="toggleVoice()">🎤 Voz</button>
-      <button class="btn" onclick="nextSlide()">Próximo →</button>
+   </div>
+   <div class="controls"><button class="btn" id="prev-btn" onclick="previousSlide()">← Anterior</button>
+    <div class="slide-info"><span id="slide-num" style="font-weight:bold;">1 / 37</span>
     </div>
-  </div>
-
+    <div class="progress-bar">
+     <div class="progress-fill" id="progress-fill"></div>
+    </div><button class="btn" style="background:#9c27b0" onclick="toggleNotes()">📝 Notas</button> <button class="btn btn-voice-inactive" id="voice-btn" onclick="toggleVoice()">🎤 Voz</button> <button class="btn" id="next-btn" onclick="nextSlide()">Próximo →</button>
+   </div>
+  </div><!-- Panel de Notas -->
   <div class="notes-panel" id="notes-panel">
-    <div style="padding: 20px; border-bottom: 1px solid #64b5f6; display: flex; justify-content: space-between; align-items: center;">
-      <h3>Notas - Slide <span id="note-num">1</span></h3>
-      <button onclick="toggleNotes()" style="color:#64b5f6; background:none; border:none; cursor:pointer; font-size:1.5rem;">✕</button>
-    </div>
-    <textarea id="notes-text" placeholder="Escreva suas observações ou extraia o texto do slide..."></textarea>
-    <div style="padding: 15px; display: flex; gap: 8px; flex-wrap: wrap;">
-      <button class="btn" style="flex:1; font-size:0.8rem;" onclick="extractText()">📄 Extrair Texto</button>
-      <button class="btn" style="flex:1; font-size:0.8rem; background:#4caf50;" onclick="downloadPDF()">📥 Baixar PDF</button>
-      <button class="btn" style="flex:1; font-size:0.8rem; background:#f44336;" onclick="clearNotes()">🗑️ Limpar</button>
-    </div>
+   <div class="notes-header">
+    <h3>📝 Notas - Slide <span id="note-num">1</span></h3><button class="notes-close" onclick="toggleNotes()">✕</button>
+   </div><textarea id="notes-text" placeholder="Escreva suas observações ou extraia o texto do slide..."></textarea>
+   <div class="notes-buttons"><button class="notes-btn notes-btn-primary" onclick="extractText()">📄 Extrair</button> <button class="notes-btn notes-btn-success" onclick="downloadPDF()">📥 PDF</button> <button class="notes-btn notes-btn-danger" onclick="clearNotes()">🗑️ Limpar</button>
+   </div>
   </div>
-
   <script>
     let currentSlide = 1;
     const totalSlides = 37;
     let voiceActive = false;
     let recognition = null;
+    let config = { presentation_title: 'Introdução à Anatomia Humana' };
+    const defaultConfig = { presentation_title: 'Introdução à Anatomia Humana' };
 
+    // Dados dos slides com transcrições completas
     const slideData = {
       1: { text: "Introdução a Anatomia humana. Professora: Claudia Pinheiro.", links: [{ label: "📅 Cronograma", url: "https://pinheiro767.github.io/Turma-seg-2026/", color: "#ff9800" }] },
-      [cite_start]2: { text: "Anatomia: Ciência estudada formalmente pela primeira vez no Egito (~500 a.C.).[span_0](end_span)" },
-      [span_1](start_span)3: { text: "Galeno (Séc. II-III): Primeiro anatomista, dissecação apenas de porcos e macacos.[span_1](end_span)" },
-      4: { text: "Andreas Vesalius: Pai da Anatomia Moderna. [span_2](start_span)Dissecação de corpos humanos.[span_2](end_span)" },
-      [span_3](start_span)5: { text: "Ressurrecionistas: Desenterravam corpos para revenda a estudiosos.[span_3](end_span)" },
-      [span_4](start_span)6: { text: "Mortsafes: Grades sobre os túmulos contra roubo de corpos.[span_4](end_span)" },
-      [span_5](start_span)8: { text: "Etimologia: Anatomia (Grego 'Anatome' - corte através) e Dissecação (Latim 'Dis secare' - cortar separado).[span_5](end_span)" },
-      [span_6](start_span)9: { text: "Subdivisões: Macroscópica, Microscópica e do Desenvolvimento.[span_6](end_span)" },
-      [span_7](start_span)11: { text: "Hierarquia: Átomo, Molécula, Organelas, Célula, Tecido, Órgão e Sistema.[span_7](end_span)" },
-      [span_8](start_span)15: { text: "Posição Anatômica: Olhos e pés para frente, palmas anteriores, membros próximos e paralelos.[span_8](end_span)" },
-      [span_9](start_span)18: { text: "Planos: Sagital, Transversal (Mediano).[span_9](end_span)", links: [{ label: "🎮 Jogos", url: "https://pinheiro767.github.io/Inicio-anato-2026/", color: "#4caf50" }] },
-      [span_10](start_span)19: { text: "Plano Mediano: Divide o corpo em lados direito e esquerdo.[span_10](end_span)" },
-      [span_11](start_span)21: { text: "Plano Frontal (Coronal): Partes anterior e posterior.[span_11](end_span)" },
-      [span_12](start_span)22: { text: "Plano Transverso (Axial): Partes superior e inferior.[span_12](end_span)" },
-      [span_13](start_span)23: { text: "Eixos: Linhas imaginárias que atravessam planos para os movimentos.[span_13](end_span)" },
-      [span_14](start_span)24: { text: "Plano Frontal x Eixo Sagital: Abdução e Adução.[span_14](end_span)" },
-      [span_15](start_span)25: { text: "Plano Sagital x Eixo Latero-lateral: Flexão e Extensão.[span_15](end_span)" },
-      [span_16](start_span)26: { text: "Plano Transversal x Eixo Longitudinal: Rotação.[span_16](end_span)" },
-      [span_17](start_span)27: { text: "Movimentos: Flexão, Abdução, Adução, Rotação e Circundação.[span_17](end_span)" },
-      [span_18](start_span)28: { text: "Importância: Mobilidade e prevenção de lesões.[span_18](end_span)" },
-      [span_19](start_span)29: { text: "Cortes: Longitudinal, Oblíquo e Transverso.[span_19](end_span)" },
-      [span_20](start_span)32: { text: "Termos: Superior/Cranial, Inferior/Caudal, Anterior/Ventral, Posterior/Dorsal.[span_20](end_span)" },
-      33: { text: "Comparação: Superficial, Intermédio, Profundo. [span_21](start_span)Distal, Medial, Proximal, Lateral.[span_21](end_span)" },
-      [span_22](start_span)35: { text: "Anomalia: Alteração morfológica, prejuízo funcional, compatível com a vida.[span_22](end_span)" },
-      [span_23](start_span)36: { text: "Monstruosidade: Alteração grave, compromete estruturas vitais, incompatível com a vida.[span_23](end_span)" },
-      [span_24](start_span)37: { text: "História: Freak shows, Julia Pastrana e irmãos siameses.[span_24](end_span)" }
+      2: { text: "A Anatomia é uma das mais antigas ciências médicas básicas: foi estudada formalmente pela primeira vez no Egito (aproximadamente 500 a.C.)." },
+      3: { text: "Galeno (Séc. II e III, Império Romano): Primeiro anatomista do mundo. Tinha experiência apenas em dissecação de porcos, macacos e outros animais." },
+      4: { text: "Andreas Vesalius (1514-1564): Pai da Anatomia Moderna, ícone da Renascença. Seus estudos através da dissecação de corpos humanos avançaram significativamente em relação aos de Galeno." },
+      5: { text: "Ressurrecionistas: Passaram séculos desenterrando corpos de túmulos para revendê-los a estudiosos." },
+      6: { text: "Mortsafes: Grades colocadas sobre os túmulos para evitar o roubo de corpos." },
+      7: { text: "William Burke e William Hare: Dupla que eliminava vítimas em Edimburgo para lucrar vendendo os corpos para anatomistas." },
+      8: { text: "Etimologia: Anatomia (Grego 'Anatome' - corte através de) e Dissecação (Latim 'Dis secare' - cortar separado)." },
+      9: { text: "Subdivisões: Anatomia Macroscópica, Microscópica e do Desenvolvimento." },
+      10: { text: "Níveis de Organização e Sistemas do Corpo." },
+      11: { text: "Hierarquia Biológica: Representação visual de Átomo, Molécula, Organelas, Célula, Tecido, Órgão e Sistema." },
+      12: { text: "Métodos de Estudo: Anatomia regional, sistêmica e clínica. Termos: Tecido, Órgão." },
+      13: { text: "Formas de Estudar: Dissecação, Imagens, Modelos, Apalpação e Auscultação." },
+      14: { text: "Considerações Anatômicas: Divisão do corpo humano e Posição Anatômica." },
+      15: { text: "Posição Anatômica: 1. Cabeça, olhos e dedos dos pés voltados anteriormente; 2. Braços ao lado do corpo com palmas voltadas anteriormente; 3. Membros inferiores próximos e pés paralelos." },
+      16: { text: "Termos de movimento." },
+      17: { text: "Dinâmica: Movimentos ocorrem em planos e eixos específicos, envolvendo ossos, músculos e articulações." },
+      18: { text: "Planos Anatômicos: Transversal (mediano) e Sagital.", links: [{ label: "🎮 Jogos", url: "https://pinheiro767.github.io/Inicio-anato-2026/", color: "#4caf50" }, { label: "🧪 Teste", url: "https://pinheiro767.github.io/Inicio-anato-2026/", color: "#b366ff" }] },
+      19: { text: "Plano Mediano: Divide o corpo humano em lados direito e esquerdo." },
+      20: { text: "Plano Sagital: Divide o corpo em duas partes assimétricas." },
+      21: { text: "Plano Frontal (Coronal): Divide o corpo em partes anterior e posterior." },
+      22: { text: "Plano Transverso (Axial): Divide o corpo em partes superior e inferior." },
+      23: { text: "Eixos do Corpo Humano: Linhas imaginárias que atravessam planos paralelos em torno das quais ocorrem os movimentos." },
+      24: { text: "Plano Frontal x Eixo Sagital: Movimentos de Abdução e Adução ocorrem em planos frontais em torno de um eixo antero-posterior." },
+      25: { text: "Plano Sagital x Eixo Latero-lateral: Flexão e Extensão geralmente ocorrem em planos sagitais em torno de um eixo transverso." },
+      26: { text: "Plano Transversal x Eixo Longitudinal: Movimentos de rotação ocorrem no plano transversal em torno do eixo longitudinal." },
+      27: { text: "Glossário: Flexão (diminui ângulo), Abdução/Adução (afasta/aproxima da linha média), Rotação (gira no eixo) e Circundação (movimento circular combinado)." },
+      28: { text: "Importância: Compreender movimentos é fundamental para profissionais da saúde e esporte, contribuindo para mobilidade e prevenção de lesões." },
+      29: { text: "Cortes Anatômicos: Principal uso dos planos é descrever cortes Longitudinais, Oblíquos e Transversos." },
+      30: { text: "Esquema Visual: Ilustrações dos planos Sagital e Transversal." },
+      31: { text: "Terminologia Anatômica e Posição Anatômica." },
+      32: { text: "Termos de Relação: Superior (Cranial), Inferior (Caudal), Anterior (Ventral), Posterior (Dorsal). Faces Palmar e Plantar." },
+      33: { text: "Termos de Comparação: Superficial, Intermédio e Profundo; Proximal, Distal, Medial e Lateral." },
+      34: { text: "Conceito Normal: Características anatômicas presentes na maioria da população, consideradas mais frequentes ou comuns." },
+      35: { text: "Anomalia: Alteração morfológica que difere do normal, traz prejuízo à função, mas é compatível com a vida (ex: Polidactilia)." },
+      36: { text: "Monstruosidade: Alteração grave que compromete estruturas vitais e gera prejuízo funcional severo, sendo incompatível com a vida." },
+      37: { text: "História: Freak shows do século XIX, incluindo Julia Pastrana, irmãos siameses e o menino parasita." }
     };
+
+    // Inicializar Element SDK
+    async function initElement() {
+      if (!window.elementSdk) return;
+      await window.elementSdk.init({
+        defaultConfig,
+        onConfigChange: async (newConfig) => {
+          config = newConfig;
+          document.getElementById('presentation-title').textContent = config.presentation_title || defaultConfig.presentation_title;
+        },
+        mapToCapabilities: () => ({ recolorables: [], borderables: [], fontEditable: undefined, fontSizeable: undefined }),
+        mapToEditPanelValues: (cfg) => new Map([['presentation_title', cfg.presentation_title || defaultConfig.presentation_title]])
+      });
+    }
 
     function updateUI() {
       document.getElementById('slide-num').innerText = `${currentSlide} / ${totalSlides}`;
       document.getElementById('note-num').innerText = currentSlide;
-      document.getElementById('progress-fill').style.width = (currentSlide/totalSlides)*100 + "%";
+      document.getElementById('progress-fill').style.width = (currentSlide / totalSlides) * 100 + "%";
+      
       const container = document.getElementById('slide-container');
-      container.innerHTML = `<img src="assets/slide${currentSlide}.jpg" class="slide-image" onerror="this.parentElement.innerHTML='📊 Slide ${currentSlide}'">`;
-      const btnArea = document.getElementById('dynamic-btns');
-      btnArea.innerHTML = '';
-      if(slideData[currentSlide]?.links) {
-        slideData[currentSlide].links.forEach(l => {
-          const b = document.createElement('button');
-          b.className = 'btn'; b.style.background = l.color; b.innerText = l.label;
-          b.onclick = () => window.open(l.url, '_blank');
-          btnArea.appendChild(b);
-        });
-      }
+      container.innerHTML = `<img src="assets/slide${currentSlide}.jpg" class="slide-image" alt="Slide ${currentSlide}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'placeholder\\'><div style=\\'font-size: 2rem; margin-bottom: 1rem;\\'>📊</div><div>Slide ${currentSlide}</div></div>'">`;
+      
+      document.getElementById('prev-btn').disabled = currentSlide === 1;
+      document.getElementById('next-btn').disabled = currentSlide === totalSlides;
+
       if(document.getElementById('notes-panel').classList.contains('active')) loadNotes();
     }
 
-    function toggleNotes() { document.getElementById('notes-panel').classList.toggle('active'); loadNotes(); }
-    function loadNotes() { document.getElementById('notes-text').value = localStorage.getItem(`note-${currentSlide}`) || ""; }
-    
+    function toggleNotes() { 
+      document.getElementById('notes-panel').classList.toggle('active');
+      if(document.getElementById('notes-panel').classList.contains('active')) loadNotes();
+    }
+
+    function loadNotes() { 
+      document.getElementById('notes-text').value = localStorage.getItem(`note-${currentSlide}`) || ""; 
+    }
+
     function extractText() {
       const info = slideData[currentSlide]?.text || `Conteúdo do Slide ${currentSlide}`;
       const ta = document.getElementById('notes-text');
-      ta.value += (ta.value ? "\n\n" : "") + "--- Transcrição ---\n" + info;
+      ta.value += (ta.value ? "\n\n" : "") + "--- TRANSCRIÇÃO SLIDE " + currentSlide + " ---\n" + info;
       localStorage.setItem(`note-${currentSlide}`, ta.value);
     }
 
     function downloadPDF() {
       const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
       const txt = document.getElementById('notes-text').value;
-      if(!txt) return alert("Notas vazias!");
-      doc.setFontSize(16); doc.text(`Anatomia - Slide ${currentSlide}`, 10, 20);
-      doc.setFontSize(12); doc.text(txt, 10, 30, { maxWidth: 180 });
-      doc.save(`Anatomia_Slide_${currentSlide}.pdf`);
+      if(!txt.trim()) {
+        alert("Notas vazias! Escreva algo antes de baixar.");
+        return;
+      }
+      const doc = new jsPDF();
+      doc.setFontSize(16);
+      doc.text(`Aula de Anatomia - Slide ${currentSlide}`, 10, 20);
+      doc.setFontSize(11);
+      doc.text(txt, 10, 30, { maxWidth: 180 });
+      doc.save(`Aula_Anatomia_Slide_${currentSlide}.pdf`);
     }
 
-    function clearNotes() { if(confirm("Limpar notas?")) { document.getElementById('notes-text').value = ""; localStorage.removeItem(`note-${currentSlide}`); } }
+    function clearNotes() { 
+      if(confirm("Tem certeza que deseja limpar as notas deste slide?")) {
+        document.getElementById('notes-text').value = ""; 
+        localStorage.removeItem(`note-${currentSlide}`);
+      }
+    }
 
     function toggleVoice() {
       if(!recognition) {
         const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if(!SR) return alert("Sem suporte a voz.");
-        recognition = new SR(); recognition.lang = 'pt-BR'; recognition.continuous = true;
+        if(!SR) {
+          alert("Seu navegador não suporta reconhecimento de voz.");
+          return;
+        }
+        recognition = new SR();
+        recognition.lang = 'pt-BR';
+        recognition.continuous = true;
         recognition.onresult = (e) => {
           const cmd = e.results[e.results.length-1][0].transcript.toLowerCase();
-          if(cmd.includes("próximo")) nextSlide();
-          if(cmd.includes("anterior")) previousSlide();
+          if(cmd.includes("próximo") || cmd.includes("avançar")) nextSlide();
+          if(cmd.includes("anterior") || cmd.includes("voltar")) previousSlide();
         };
       }
       voiceActive ? recognition.stop() : recognition.start();
       voiceActive = !voiceActive;
-      document.getElementById('voice-btn').style.background = voiceActive ? "#4caf50" : "#ff9800";
+      const btn = document.getElementById('voice-btn');
+      btn.classList.toggle('btn-voice-active');
+      btn.classList.toggle('btn-voice-inactive');
     }
 
     function nextSlide() { if(currentSlide < totalSlides) { currentSlide++; updateUI(); } }
     function previousSlide() { if(currentSlide > 1) { currentSlide--; updateUI(); } }
-    document.addEventListener('keydown', (e) => { if(e.key === "ArrowRight") nextSlide(); if(e.key === "ArrowLeft") previousSlide(); });
+    
+    document.addEventListener('keydown', (e) => { 
+      if(e.key === "ArrowRight") nextSlide(); 
+      if(e.key === "ArrowLeft") previousSlide();
+      if(e.key === "Escape") {
+        if(document.getElementById('notes-panel').classList.contains('active')) {
+          document.getElementById('notes-panel').classList.remove('active');
+        }
+      }
+    });
+
+    // Salvar notas ao digitar
+    document.getElementById('notes-text').addEventListener('change', () => {
+      localStorage.setItem(`note-${currentSlide}`, document.getElementById('notes-text').value);
+    });
+
+    // Inicializar
+    initElement();
     updateUI();
   </script>
-</body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d2317cf10cc2ce9',t:'MTc3MTgxMTY0Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
