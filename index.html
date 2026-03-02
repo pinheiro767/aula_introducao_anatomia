@@ -20,16 +20,18 @@
 
     .header {
       background: rgba(48, 43, 99, 0.8);
-      padding: 1.2rem;
+      padding: clamp(0.6rem, 2vw, 1.2rem);
       border-bottom: 2px solid #64b5f6;
       text-align: center;
+      flex-shrink: 0;
     }
 
     .title {
-      font-size: clamp(1.5rem, 4vw, 2.2rem);
+      font-size: clamp(1rem, 5vw, 2.2rem);
       font-weight: 700;
       color: #64b5f6;
       text-shadow: 0 0 15px rgba(100, 181, 246, 0.5);
+      margin: 0;
     }
 
     .content {
@@ -37,8 +39,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 2rem;
+      padding: clamp(1rem, 3vw, 2rem);
       position: relative;
+      min-height: 0;
     }
 
     .slide-container {
@@ -48,7 +51,7 @@
       align-items: center;
       justify-content: center;
       background: rgba(0,0,0,0.2);
-      border-radius: 20px;
+      border-radius: clamp(10px, 3vw, 20px);
       border: 2px solid rgba(100, 181, 246, 0.3);
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
       overflow: hidden;
@@ -72,23 +75,28 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 1rem;
-      padding: 1.2rem;
+      gap: clamp(0.5rem, 1.5vw, 1rem);
+      padding: clamp(0.8rem, 2vw, 1.2rem);
       background: rgba(48, 43, 99, 0.9);
       border-top: 2px solid #64b5f6;
       flex-wrap: wrap;
+      flex-shrink: 0;
+      overflow-y: auto;
+      max-height: 25vh;
     }
 
     .btn {
       background: #42a5f5;
       color: white;
-      padding: 0.75rem 1.25rem;
+      padding: clamp(0.6rem, 1.5vw, 0.75rem) clamp(0.8rem, 2vw, 1.25rem);
       border-radius: 25px;
       font-weight: bold;
       cursor: pointer;
       border: none;
       transition: 0.3s;
       box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      font-size: clamp(0.7rem, 2vw, 1rem);
+      white-space: nowrap;
     }
 
     .btn:hover:not(:disabled) {
@@ -103,11 +111,17 @@
     .btn-voice-inactive { background: #ff9800 !important; }
     .btn-fullscreen { background: #00bcd4 !important; }
 
-    .slide-info { display: flex; align-items: center; gap: 0.5rem; }
+    .slide-info { 
+      display: flex; 
+      align-items: center; 
+      gap: clamp(0.3rem, 1vw, 0.5rem); 
+      font-size: clamp(0.75rem, 2vw, 0.95rem);
+      font-weight: bold;
+    }
 
     .progress-bar {
-      width: 200px;
-      height: 8px;
+      width: clamp(120px, 20vw, 200px);
+      height: 6px;
       background: rgba(100, 181, 246, 0.2);
       border-radius: 5px;
       overflow: hidden;
@@ -130,20 +144,20 @@
       height: 100%;
       background: linear-gradient(135deg, rgba(100, 200, 255, 0.1), rgba(255, 100, 200, 0.1));
       border-radius: 12px;
-      font-size: 1.2rem;
+      font-size: clamp(1rem, 3vw, 1.5rem);
       color: #a0c4ff;
     }
 
     .link-buttons {
       position: absolute;
-      bottom: 40px;
+      bottom: clamp(20px, 3vh, 40px);
       left: 0;
       width: 100%;
       display: flex;
-      gap: 12px;
+      gap: clamp(8px, 2vw, 12px);
       flex-wrap: wrap;
       justify-content: center;
-      padding: 0 12px;
+      padding: clamp(6px, 2vw, 12px);
       pointer-events: none;
     }
 
@@ -151,17 +165,18 @@
       pointer-events: auto;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       text-decoration: none;
       color: #fff;
       font-weight: 800;
-      padding: 12px 18px;
+      padding: clamp(8px, 1.5vw, 12px) clamp(12px, 2vw, 18px);
       border-radius: 999px;
       box-shadow: 0 10px 26px rgba(0,0,0,.45);
       border: 1px solid rgba(255,255,255,.18);
       backdrop-filter: blur(10px);
       transition: transform .25s ease, filter .25s ease;
       filter: saturate(1.05);
+      font-size: clamp(0.7rem, 2vw, 0.9rem);
     }
 
     .link-buttons a:hover {
@@ -171,9 +186,9 @@
 
     .notes-panel {
       position: fixed;
-      right: -420px;
+      right: -100%;
       top: 0;
-      width: 420px;
+      width: min(420px, 90vw);
       height: 100%;
       background: rgba(15, 12, 41, 0.95);
       border-left: 2px solid #b366ff;
@@ -188,27 +203,29 @@
     .notes-panel.active { right: 0; }
 
     .notes-header {
-      padding: 1.5rem;
+      padding: clamp(1rem, 2vw, 1.5rem);
       border-bottom: 1px solid rgba(100, 181, 246, 0.4);
       display: flex;
       justify-content: space-between;
       align-items: center;
       background: rgba(100, 181, 246, 0.1);
+      flex-shrink: 0;
     }
 
     .notes-header h3 { 
-      font-size: 1.1rem; 
+      font-size: clamp(0.9rem, 2.5vw, 1.1rem); 
       color: #64b5f6;
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      margin: 0;
     }
 
     .notes-indicator {
       display: none;
       color: #4caf50;
       font-weight: bold;
-      font-size: 0.9rem;
+      font-size: clamp(0.75rem, 1.5vw, 0.9rem);
     }
 
     .notes-indicator.active {
@@ -220,8 +237,10 @@
       background: none;
       border: none;
       cursor: pointer;
-      font-size: 1.5rem;
+      font-size: clamp(1.2rem, 3vw, 1.5rem);
       transition: 0.2s;
+      flex-shrink: 0;
+      margin-left: 0.5rem;
     }
 
     .notes-close:hover { color: #42a5f5; }
@@ -230,33 +249,35 @@
       flex: 1;
       background: rgba(15, 12, 41, 0.9);
       color: #fff;
-      padding: 1.5rem;
+      padding: clamp(1rem, 2vw, 1.5rem);
       border: none;
       outline: none;
       resize: none;
-      font-size: 0.95rem;
+      font-size: clamp(0.8rem, 2vw, 0.95rem);
       border-top: 1px solid rgba(100, 181, 246, 0.2);
       font-family: 'Segoe UI', sans-serif;
       line-height: 1.6;
       white-space: pre-wrap;
+      min-height: 0;
     }
 
     #notes-text::placeholder { color: rgba(255, 255, 255, 0.4); }
 
     .notes-buttons {
-      padding: 1.2rem;
+      padding: clamp(0.8rem, 2vw, 1.2rem);
       display: flex;
-      gap: 8px;
+      gap: clamp(6px, 1.5vw, 8px);
       flex-wrap: wrap;
       background: rgba(100, 181, 246, 0.05);
       border-top: 1px solid rgba(100, 181, 246, 0.2);
+      flex-shrink: 0;
     }
 
     .notes-btn {
       flex: 1;
-      min-width: 110px;
-      padding: 0.7rem;
-      font-size: 0.8rem;
+      min-width: 100px;
+      padding: clamp(0.6rem, 1.5vw, 0.7rem);
+      font-size: clamp(0.65rem, 1.5vw, 0.8rem);
       border-radius: 20px;
       border: none;
       cursor: pointer;
@@ -277,28 +298,67 @@
     #voice-status {
       font-weight: 800;
       opacity: .95;
-      padding: .3rem .7rem;
+      padding: clamp(0.2rem, 1vw, 0.3rem) clamp(0.5rem, 1.5vw, 0.7rem);
       border-radius: 999px;
       border: 1px solid rgba(255,255,255,.16);
       background: rgba(0,0,0,.18);
+      font-size: clamp(0.65rem, 1.5vw, 0.85rem);
+      white-space: nowrap;
     }
 
-    .keyboard-help {
-      display: none;
+    @media (max-width: 640px) {
+      .controls {
+        gap: 0.5rem;
+        padding: 0.6rem;
+      }
+      
+      .btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.75rem;
+      }
+
+      .slide-info {
+        font-size: 0.7rem;
+      }
+
+      .notes-panel {
+        width: 100vw;
+        right: -100vw;
+      }
+
+      .progress-bar {
+        display: none;
+      }
     }
 
-    @media (max-width: 768px) {
-      .notes-panel { width: 80vw; right: -80vw; }
-      .controls { gap: 0.8rem; }
-      .btn { padding: 0.6rem 1rem; font-size: 0.85rem; }
-      .progress-bar { width: 150px; }
-      .link-buttons { bottom: 18px; }
-      .keyboard-help { display: none; }
+    @media (max-width: 480px) {
+      .controls {
+        gap: 0.4rem;
+        padding: 0.5rem;
+        max-height: 30vh;
+      }
+      
+      .btn {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.65rem;
+      }
+
+      .slide-info {
+        font-size: 0.65rem;
+      }
+
+      .content {
+        padding: 0.8rem;
+      }
+
+      .header {
+        padding: 0.5rem;
+      }
     }
   </style>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
   <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
   <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
  </head>
  <body>
   <div class="app-wrapper">
@@ -317,29 +377,23 @@
      </div>
     </div>
    </div>
-   <div class="controls"><button class="btn" id="prev-btn" onclick="previousSlide()">← Anterior</button>
-    <div class="slide-info"><span id="slide-num" style="font-weight:bold;">1 / 37</span>
+   <div class="controls">
+    <button class="btn" id="prev-btn" onclick="previousSlide()">← Anterior</button>
+    <div class="slide-info">
+     <span id="slide-num" style="font-weight:bold;">1 / 37</span>
     </div>
     <div class="progress-bar">
      <div class="progress-fill" id="progress-fill"></div>
-    </div><button class="btn" style="background:#9c27b0" onclick="toggleNotes()">📝 Notas (N)</button> <button class="btn btn-voice-inactive" id="voice-btn" onclick="toggleVoice()">🎤 Voz (V)</button> <span id="voice-status">🎤 Voz: desligada</span> <button class="btn" id="link-btn" onclick="openCurrentLink()" style="background:#ff6b6b; display:none;">📅 Cronograma (L)</button> <button class="btn btn-fullscreen" onclick="toggleFullscreen()">⛶ Tela Cheia (F)</button> <button class="btn" id="next-btn" onclick="nextSlide()">Próximo →</button>
+    </div><button class="btn" style="background:#9c27b0" onclick="toggleNotes()">📝 Notas</button> <button class="btn btn-voice-inactive" id="voice-btn" onclick="toggleVoice()">🎤 Voz</button> <span id="voice-status">🎤 Desligada</span> <button class="btn" id="link-btn" onclick="openCurrentLink()" style="background:#ff6b6b; display:none;">📅 Link</button> <button class="btn btn-fullscreen" onclick="toggleFullscreen()">⛶ Tela Cheia</button> <button class="btn" id="next-btn" onclick="nextSlide()">Próximo →</button>
    </div>
   </div>
   <div class="notes-panel" id="notes-panel">
    <div class="notes-header">
-    <h3>📝 Notas - Slide <span id="note-num">1</span> <span class="notes-indicator" id="notes-indicator">✓</span></h3><button class="notes-close" onclick="toggleNotes()">✕</button>
-   </div><textarea id="notes-text" placeholder="Escreva suas observações ou extraia o texto do slide..."></textarea>
-   <div class="notes-buttons"><button class="notes-btn notes-btn-primary" onclick="extractText()">📄 Extrair</button> <button class="notes-btn notes-btn-success" onclick="downloadPDF()">📥 PDF</button> <button class="notes-btn notes-btn-danger" onclick="clearNotes()">🗑️ Limpar</button>
+    <h3>📝 Slide <span id="note-num">1</span> <span class="notes-indicator" id="notes-indicator">✓</span></h3><button class="notes-close" onclick="toggleNotes()">✕</button>
+   </div><textarea id="notes-text" placeholder="Escreva suas observações..."></textarea>
+   <div class="notes-buttons">
+    <button class="notes-btn notes-btn-primary" onclick="extractText()">📄 Extrair</button> <button class="notes-btn notes-btn-success" onclick="downloadPDF()">📥 PDF</button> <button class="notes-btn notes-btn-danger" onclick="clearNotes()">🗑️ Limpar</button>
    </div>
-  </div>
-  <div class="keyboard-help" title="Clique para mais info">
-   <h4>⌨️ Atalhos</h4>
-   <p><kbd>←</kbd> / <kbd>→</kbd> <span>Navegar</span></p>
-   <p><kbd>1-9</kbd> / <kbd>0</kbd> <span>Ir para slide</span></p>
-   <p><kbd>V</kbd> <span>Voz</span></p>
-   <p><kbd>N</kbd> <span>Notas</span></p>
-   <p><kbd>L</kbd> <span>Link</span></p>
-   <p><kbd>F</kbd> <span>Tela Cheia</span></p>
   </div>
   <script>
     let currentSlide = 1;
@@ -363,12 +417,12 @@
         btn.classList.add("btn-voice-active");
         btn.classList.remove("btn-voice-inactive");
         btn.textContent = "🎤 Ouvindo";
-        status.textContent = msg ? `🎤 Voz: ouvindo — ${msg}` : "🎤 Voz: ouvindo";
+        status.textContent = msg ? `🎤 ${msg}` : "🎤 Ativo";
       } else {
         btn.classList.remove("btn-voice-active");
         btn.classList.add("btn-voice-inactive");
-        btn.textContent = "🎤 Voz (V)";
-        status.textContent = msg ? `🎤 Voz: desligada — ${msg}` : "🎤 Voz: desligada";
+        btn.textContent = "🎤 Voz";
+        status.textContent = msg ? `🎤 ${msg}` : "🎤 Desligada";
       }
     }
 
@@ -427,13 +481,13 @@
       const cmd = normalizeText(raw);
 
       if (cmd.includes("proximo") || cmd.includes("avancar") || cmd.includes("seguir")) {
-        setVoiceUI(true, "comando: próximo");
+        setVoiceUI(true, "Próximo");
         nextSlide();
         return;
       }
 
       if (cmd.includes("anterior") || cmd.includes("voltar") || cmd.includes("retornar")) {
-        setVoiceUI(true, "comando: anterior");
+        setVoiceUI(true, "Anterior");
         previousSlide();
         return;
       }
@@ -441,51 +495,51 @@
       if (cmd.includes("ir para") || cmd.includes("vai para") || cmd.includes("slide") || cmd.includes("pagina")) {
         const n = parseSlideNumber(cmd);
         if (n != null) {
-          setVoiceUI(true, `ir para slide ${n}`);
+          setVoiceUI(true, `Slide ${n}`);
           goToSlide(n);
           return;
         }
       }
 
-      if (cmd.includes("primeiro")) { setVoiceUI(true, "primeiro slide"); goToSlide(1); return; }
-      if (cmd.includes("ultimo") || cmd.includes("final")) { setVoiceUI(true, "último slide"); goToSlide(totalSlides); return; }
+      if (cmd.includes("primeiro")) { setVoiceUI(true, "Primeiro"); goToSlide(1); return; }
+      if (cmd.includes("ultimo") || cmd.includes("final")) { setVoiceUI(true, "Último"); goToSlide(totalSlides); return; }
 
-      if (cmd.includes("abrir notas") || cmd.includes("mostrar notas")) { setVoiceUI(true, "abrir notas"); openNotes(true); return; }
-      if (cmd.includes("fechar notas") || cmd.includes("esconder notas")) { setVoiceUI(true, "fechar notas"); openNotes(false); return; }
+      if (cmd.includes("abrir notas") || cmd.includes("mostrar notas")) { setVoiceUI(true, "Notas"); openNotes(true); return; }
+      if (cmd.includes("fechar notas") || cmd.includes("esconder notas")) { setVoiceUI(true, "Fechar"); openNotes(false); return; }
 
-      if (cmd.includes("extrair") || cmd.includes("transcrever")) { setVoiceUI(true, "extrair texto"); extractText(); return; }
-      if (cmd.includes("baixar pdf") || cmd.includes("gerar pdf") || cmd.includes("download pdf")) { setVoiceUI(true, "baixar PDF"); downloadPDF(); return; }
-      if (cmd.includes("limpar") || cmd.includes("apagar notas")) { setVoiceUI(true, "limpar notas"); clearNotes(); return; }
+      if (cmd.includes("extrair") || cmd.includes("transcrever")) { setVoiceUI(true, "Extraindo"); extractText(); return; }
+      if (cmd.includes("baixar pdf") || cmd.includes("gerar pdf") || cmd.includes("download pdf")) { setVoiceUI(true, "PDF"); downloadPDF(); return; }
+      if (cmd.includes("limpar") || cmd.includes("apagar notas")) { setVoiceUI(true, "Limpando"); clearNotes(); return; }
 
       if (cmd.includes("cronograma")) {
-        setVoiceUI(true, "abrir cronograma");
+        setVoiceUI(true, "Cronograma");
         openLinkForSlide(1, "cronograma");
         return;
       }
       if (cmd.includes("teste")) {
-        setVoiceUI(true, "abrir teste");
+        setVoiceUI(true, "Teste");
         openLinkForSlide(18, "teste");
         return;
       }
       if (cmd.includes("jogos")) {
-        setVoiceUI(true, "abrir jogos");
+        setVoiceUI(true, "Jogos");
         openLinkForSlide(18, "jogos");
         return;
       }
 
       if (cmd.includes("abrir link") || cmd.includes("link")) {
-        setVoiceUI(true, "abrir link");
+        setVoiceUI(true, "Abrindo");
         openCurrentLink();
         return;
       }
 
       if (cmd.includes("tela cheia") || cmd.includes("fullscreen")) {
-        setVoiceUI(true, "ativando tela cheia");
+        setVoiceUI(true, "Tela cheia");
         toggleFullscreen();
         return;
       }
 
-      setVoiceUI(true, `ouvi: "${raw.trim()}" (sem ação)`);
+      setVoiceUI(true, `"${raw.trim()}"`);
     }
 
     function setupRecognition() {
@@ -500,7 +554,7 @@
       let lastFinal = "";
 
       r.onstart = () => setVoiceUI(true);
-      r.onerror = (e) => setVoiceUI(voiceActive, `erro: ${e.error || "desconhecido"}`);
+      r.onerror = (e) => setVoiceUI(voiceActive, `Erro`);
 
       r.onresult = (e) => {
         let interim = "";
@@ -512,7 +566,7 @@
           else interim += t + " ";
         }
 
-        if (interim.trim()) setVoiceUI(true, `ouvindo: ${interim.trim()}`);
+        if (interim.trim()) setVoiceUI(true, `Ouvindo...`);
 
         const cleanFinal = finalTxt.trim();
         if (cleanFinal && cleanFinal !== lastFinal) {
@@ -535,7 +589,7 @@
     function toggleVoice() {
       if (!recognition) recognition = setupRecognition();
       if (!recognition) { 
-        setVoiceUI(false, "navegador não suporta voz");
+        setVoiceUI(false, "Não suportado");
         return; 
       }
 
@@ -543,7 +597,7 @@
 
       if (voiceActive) {
         try { recognition.start(); } catch (e) {}
-        setVoiceUI(true, "diga: próximo, anterior, abrir notas, ir para slide 10...");
+        setVoiceUI(true, "Ativa");
       } else {
         try { recognition.stop(); } catch (_) {}
         setVoiceUI(false);
@@ -581,7 +635,7 @@
         text:`Página 18: Planos Anatômicos\n- Indicação de Plano Transversal (Mediano) e Plano Sagital.`,
         links:[
           { label:"🎮 Jogos", url:"https://pinheiro767.github.io/Inicio-anato-2026/", color:"#4caf50" },
-          { label:"🧪 Teste os conhecimentos", url:"https://pinheiro767.github.io/Inicio-anato-2026/", color:"#b366ff" }
+          { label:"🧪 Teste", url:"https://pinheiro767.github.io/Inicio-anato-2026/", color:"#b366ff" }
         ]
       },
       19:{ text:`Página 19: Plano Mediano\n- O plano mediano divide o corpo humano em lados direito e esquerdo.` },
@@ -688,7 +742,7 @@
     function extractText() {
       const info = slideData[currentSlide]?.text || `Conteúdo do Slide ${currentSlide}`;
       const ta = document.getElementById('notes-text');
-      ta.value += (ta.value ? "\n\n" : "") + `--- TRANSCRIÇÃO SLIDE ${currentSlide} ---\n` + info;
+      ta.value += (ta.value ? "\n\n" : "") + `--- SLIDE ${currentSlide} ---\n` + info;
       saveNotes();
     }
 
@@ -793,5 +847,5 @@
 
     updateUI();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d268cb8643d32a9',t:'MTc3MTg0Nzg4OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d607f35626b6d6a',t:'MTc3MjQ1NTUwOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
