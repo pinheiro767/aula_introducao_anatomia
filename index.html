@@ -536,9 +536,57 @@
       if (cmd.includes("tela cheia") || cmd.includes("fullscreen")) {
         setVoiceUI(true, "Tela cheia");
         toggleFullscreen();
+    function handleVoiceCommand(raw) {
+      const cmd = normalizeText(raw);
+      console.log("Comando detectado:", cmd);
+
+      // Comandos de Navegação
+      if (cmd.includes("proximo") || cmd.includes("avancar") || cmd.includes("seguir") || cmd.includes("frente")) {
+        setVoiceUI(true, "Próximo");
+        nextSlide();
         return;
       }
 
+      if (cmd.includes("anterior") || cmd.includes("voltar") || cmd.includes("retornar") || cmd.includes("atras")) {
+        setVoiceUI(true, "Anterior");
+        previousSlide();
+        return;
+      }
+
+      // Ir para slide específico
+      if (cmd.includes("ir para") || cmd.includes("vai para") || cmd.includes("slide") || cmd.includes("pagina")) {
+        const n = parseSlideNumber(cmd);
+        if (n != null) {
+          setVoiceUI(true, `Slide ${n}`);
+          goToSlide(n);
+          return;
+        }
+      }
+
+      // Atalhos Rápidos
+      if (cmd.includes("primeiro")) { setVoiceUI(true, "Primeiro"); goToSlide(1); return; }
+      if (cmd.includes("ultimo") || cmd.includes("final")) { setVoiceUI(true, "Último"); goToSlide(totalSlides); return; }
+
+      // Notas e Interface
+      if (cmd.includes("notas")) { 
+        if (cmd.includes("fechar") || cmd.includes("esconder")) { setVoiceUI(true, "Fechar"); openNotes(false); }
+        else { setVoiceUI(true, "Notas"); openNotes(true); }
+        return; 
+      }
+
+      if (cmd.includes("tela cheia") || cmd.includes("fullscreen")) {
+        setVoiceUI(true, "Tela cheia");
+        toggleFullscreen();
+        return;
+      }
+
+      if (cmd.includes("abrir link") || cmd.includes("link")) {
+        setVoiceUI(true, "Abrindo");
+        openCurrentLink();
+        return;
+      }
+
+      // Feedback visual para o que foi ouvido mas não processado
       setVoiceUI(true, `"${raw.trim()}"`);
     }
 
@@ -548,36 +596,28 @@
 
       const r = new SR();
       r.lang = "pt-BR";
-      r.continuous = true;
-      r.interimResults = true;
+      r.continuous = false; // Mudar para false ajuda na precisão de comandos curtos
+      r.interimResults = false;
 
-      let lastFinal = "";
-
-      r.onstart = () => setVoiceUI(true);
-      r.onerror = (e) => setVoiceUI(voiceActive, `Erro`);
-
+      r.onstart = () => setVoiceUI(true, "Ouvindo...");
+      
       r.onresult = (e) => {
-        let interim = "";
-        let finalTxt = "";
+        const result = e.results[0][0].transcript;
+        handleVoiceCommand(result);
+      };
 
-        for (let i = e.resultIndex; i < e.results.length; i++) {
-          const t = e.results[i][0].transcript;
-          if (e.results[i].isFinal) finalTxt += t + " ";
-          else interim += t + " ";
-        }
-
-        if (interim.trim()) setVoiceUI(true, `Ouvindo...`);
-
-        const cleanFinal = finalTxt.trim();
-        if (cleanFinal && cleanFinal !== lastFinal) {
-          lastFinal = cleanFinal;
-          handleVoiceCommand(cleanFinal);
-        }
+      r.onerror = (e) => {
+        console.error("Erro no reconhecimento:", e.error);
+        if (e.error === 'no-speech') return;
+        setVoiceUI(voiceActive, "Erro");
       };
 
       r.onend = () => {
+        // ESSENCIAL: Reinicia o microfone se a voz ainda estiver ativa
         if (voiceActive) {
-          try { r.start(); } catch (_) {}
+          setTimeout(() => {
+            try { r.start(); } catch (_) {}
+          }, 100);
         } else {
           setVoiceUI(false);
         }
@@ -585,7 +625,6 @@
 
       return r;
     }
-
     function toggleVoice() {
       if (!recognition) recognition = setupRecognition();
       if (!recognition) { 
