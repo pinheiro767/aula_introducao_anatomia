@@ -431,27 +431,12 @@
       if (m) return parseInt(m[1], 10);
 
       const map = {
-        "um": 1, "uma": 1,
-        "dois": 2, "duas": 2,
-        "tres": 3,
-        "quatro": 4,
-        "cinco": 5,
-        "seis": 6,
-        "sete": 7,
-        "oito": 8,
-        "nove": 9,
-        "dez": 10,
-        "onze": 11,
-        "doze": 12,
-        "treze": 13,
-        "quatorze": 14,
-        "catorze": 14,
-        "quinze": 15,
-        "dezesseis": 16,
-        "dezessete": 17,
-        "dezoito": 18,
-        "dezenove": 19,
-        "vinte": 20
+        "um": 1, "uma": 1, "dois": 2, "duas": 2, "tres": 3,
+        "quatro": 4, "cinco": 5, "seis": 6, "sete": 7,
+        "oito": 8, "nove": 9, "dez": 10, "onze": 11,
+        "doze": 12, "treze": 13, "quatorze": 14, "catorze": 14,
+        "quinze": 15, "dezesseis": 16, "dezessete": 17,
+        "dezoito": 18, "dezenove": 19, "vinte": 20
       };
 
       for (const [k, v] of Object.entries(map)) {
@@ -479,14 +464,15 @@
 
     function handleVoiceCommand(raw) {
       const cmd = normalizeText(raw);
+      console.log("Comando detectado:", cmd);
 
-      if (cmd.includes("proximo") || cmd.includes("avancar") || cmd.includes("seguir")) {
+      if (cmd.includes("proximo") || cmd.includes("avancar") || cmd.includes("seguir") || cmd.includes("frente")) {
         setVoiceUI(true, "Próximo");
         nextSlide();
         return;
       }
 
-      if (cmd.includes("anterior") || cmd.includes("voltar") || cmd.includes("retornar")) {
+      if (cmd.includes("anterior") || cmd.includes("voltar") || cmd.includes("retornar") || cmd.includes("atras")) {
         setVoiceUI(true, "Anterior");
         previousSlide();
         return;
@@ -504,11 +490,14 @@
       if (cmd.includes("primeiro")) { setVoiceUI(true, "Primeiro"); goToSlide(1); return; }
       if (cmd.includes("ultimo") || cmd.includes("final")) { setVoiceUI(true, "Último"); goToSlide(totalSlides); return; }
 
-      if (cmd.includes("abrir notas") || cmd.includes("mostrar notas")) { setVoiceUI(true, "Notas"); openNotes(true); return; }
-      if (cmd.includes("fechar notas") || cmd.includes("esconder notas")) { setVoiceUI(true, "Fechar"); openNotes(false); return; }
+      if (cmd.includes("notas")) { 
+        if (cmd.includes("fechar") || cmd.includes("esconder")) { setVoiceUI(true, "Fechar"); openNotes(false); }
+        else { setVoiceUI(true, "Notas"); openNotes(true); }
+        return; 
+      }
 
       if (cmd.includes("extrair") || cmd.includes("transcrever")) { setVoiceUI(true, "Extraindo"); extractText(); return; }
-      if (cmd.includes("baixar pdf") || cmd.includes("gerar pdf") || cmd.includes("download pdf")) { setVoiceUI(true, "PDF"); downloadPDF(); return; }
+      if (cmd.includes("pdf")) { setVoiceUI(true, "PDF"); downloadPDF(); return; }
       if (cmd.includes("limpar") || cmd.includes("apagar notas")) { setVoiceUI(true, "Limpando"); clearNotes(); return; }
 
       if (cmd.includes("cronograma")) {
@@ -548,36 +537,28 @@
 
       const r = new SR();
       r.lang = "pt-BR";
-      r.continuous = true;
-      r.interimResults = true;
+      r.continuous = false; // Mudar para false ajuda na precisão de comandos curtos
+      r.interimResults = false;
 
-      let lastFinal = "";
-
-      r.onstart = () => setVoiceUI(true);
-      r.onerror = (e) => setVoiceUI(voiceActive, `Erro`);
-
+      r.onstart = () => setVoiceUI(true, "Ouvindo...");
+      
       r.onresult = (e) => {
-        let interim = "";
-        let finalTxt = "";
+        const result = e.results[0][0].transcript;
+        handleVoiceCommand(result);
+      };
 
-        for (let i = e.resultIndex; i < e.results.length; i++) {
-          const t = e.results[i][0].transcript;
-          if (e.results[i].isFinal) finalTxt += t + " ";
-          else interim += t + " ";
-        }
-
-        if (interim.trim()) setVoiceUI(true, `Ouvindo...`);
-
-        const cleanFinal = finalTxt.trim();
-        if (cleanFinal && cleanFinal !== lastFinal) {
-          lastFinal = cleanFinal;
-          handleVoiceCommand(cleanFinal);
-        }
+      r.onerror = (e) => {
+        console.error("Erro no reconhecimento:", e.error);
+        if (e.error === 'no-speech') return;
+        setVoiceUI(voiceActive, "Erro");
       };
 
       r.onend = () => {
+        // Reinicialização automática enquanto o botão estiver ativo
         if (voiceActive) {
-          try { r.start(); } catch (_) {}
+          setTimeout(() => {
+            try { r.start(); } catch (_) {}
+          }, 100);
         } else {
           setVoiceUI(false);
         }
@@ -606,58 +587,54 @@
 
     const slideData = {
       1: {
-  text:
-`Página 1: Capa
-- Texto principal: Introdução a Anatomia humana
-- Professora: Claudia Pinheiro
-- Conteúdo adicional: Fragmentos de texto em latim (Lorem Ipsum) e elementos gráficos decorativos.`,
-  links: [
-    { label: "📅 Cronograma Educação Física", url: "https://pinheiro767.github.io/Turma-seg-2026/", color: "#ff9800" },
-    { label: "🧬 Cronograma Biologia", url: "https://pinheiro767.github.io/Calendario_aula_bio/", color: "#4caf50" }
-  ]
-},
-      2: { text: `Página 2: História Antiga\n- "A anatomia é uma das mais antigas ciências médicas básicas: foi estudada formalmente pela primeira vez no Egito (aproximadamente 500 a.C.)".` },
-      3: { text: `Página 3: Galeno\n- Galeno viveu nos séculos II e III durante o Império Romano.\n- É considerado o primeiro anatomista do mundo.\n- Tinha experiência apenas em dissecação de porcos, macacos e outros animais.` },
-      4: { text: `Página 4: Andreas Vesalius\n- Andreas Vesalius (1514-1564) é considerado o Pai da Anatomia Moderna e um ícone da Renascença.\n- Seus estudos avançaram em relação aos de Galeno por utilizar a dissecação de corpos humanos em vez de animais.` },
-      5: { text: `Página 5: Ressurrecionistas\n- Conhecidos como ressurrecionistas, pessoas passaram séculos desenterrando corpos de túmulos para revendê-los a estudiosos.` },
-      6: { text: `Página 6: Proteção de Túmulos\n- Mortsafes: Grades colocadas sobre os túmulos para evitar o roubo de corpos.` },
-      7: { text: `Página 7: William Burke e William Hare\n- William Hare e sua esposa administravam uma pensão em Edimburgo onde William Burke morava.\n- Tornaram-se uma dupla que eliminava vítimas para lucrar com a venda dos corpos.` },
-      8: { text: `Página 8: Etimologia\n- Anatomia: Do grego anatome ("corte através de").\n- Dissecação: Do latim dis secare ("cortar separado").` },
-      9: { text: `Página 9: Subdivisões Anatômicas\n- Anatomia Macroscópica.\n- Anatomia Microscópica.\n- Anatomia do Desenvolvimento.` },
+        text: `Página 1: Capa\n- Texto principal: Introdução a Anatomia humana\n- Professora: Claudia Pinheiro`,
+        links: [
+          { label: "📅 Cronograma Educação Física", url: "https://pinheiro767.github.io/Turma-seg-2026/", color: "#ff9800" },
+          { label: "🧬 Cronograma Biologia", url: "https://pinheiro767.github.io/Calendario_aula_bio/", color: "#4caf50" }
+        ]
+      },
+      2: { text: `Página 2: História Antiga\n- A anatomia é uma das mais antigas ciências médicas básicas.` },
+      3: { text: `Página 3: Galeno\n- Galeno é considerado o primeiro anatomista do mundo.` },
+      4: { text: `Página 4: Andreas Vesalius\n- Andreas Vesalius (1514-1564) é considerado o Pai da Anatomia Moderna.` },
+      5: { text: `Página 5: Ressurrecionistas\n- Pessoas passaram séculos desenterrando corpos para revendê-los.` },
+      6: { text: `Página 6: Proteção de Túmulos\n- Mortsafes: Grades colocadas sobre os túmulos.` },
+      7: { text: `Página 7: William Burke e William Hare\n- Dupla que eliminava vítimas para vender os corpos.` },
+      8: { text: `Página 8: Etimologia\n- Anatomia: Do grego anatome ("corte através de").\n- Dissecação: Do latim dis secare.` },
+      9: { text: `Página 9: Subdivisões Anatômicas\n- Macroscópica, Microscópica e Desenvolvimento.` },
       10:{ text: `Página 10: Organização\n- Níveis de Organização e Sistemas do Corpo.` },
-      11:{ text: `Página 11: Ilustração de Níveis\n- Representação visual em hexágonos: Átomo, Molécula, Tecido, Célula (Organelas), Coração (Órgão) e Sistema.` },
-      12:{ text: `Página 12: Métodos de Estudo\n- Anatomia regional.\n- Anatomia sistêmica.\n- Anatomia clínica.\n- Termos isolados: Tecido, Órgão.` },
-      13:{ text: `Página 13: Formas de Estudo\n- Dissecação.\n- Imagens.\n- Modelos.\n- Apalpação.\n- Auscultação.` },
-      14:{ text: `Página 14: Considerações Anatômicas\n- Divisão do corpo humano.\n- Posição Anatômica.` },
-      15:{ text: `Página 15: Posição Anatômica (Padrões)\n1) A cabeça, os olhos e os dedos dos pés voltados anteriormente (para frente).\n2) Os braços ao lado do corpo, com as palmas voltadas anteriormente.\n3) Os membros inferiores próximos, com os pés paralelos.` },
+      11:{ text: `Página 11: Ilustração de Níveis\n- Átomo, Molécula, Tecido, Célula, Órgão e Sistema.` },
+      12:{ text: `Página 12: Métodos de Estudo\n- Regional, Sistêmica e Clínica.` },
+      13:{ text: `Página 13: Formas de Estudo\n- Dissecação, Imagens, Modelos, Apalpação e Auscultação.` },
+      14:{ text: `Página 14: Considerações Anatômicas\n- Divisão do corpo humano e Posição Anatômica.` },
+      15:{ text: `Página 15: Posição Anatômica (Padrões)\n- Face para frente, palmas para frente e pés paralelos.` },
       16:{ text: `Página 16: Termos de Movimento\n- Introdução aos termos de movimento.` },
-      17:{ text: `Página 17: Planos e Eixos\n- Os movimentos do corpo humano ocorrem em planos e eixos específicos, envolvendo a interação entre ossos, músculos e articulações.` },
+      17:{ text: `Página 17: Planos e Eixos\n- Movimentos em planos e eixos específicos.` },
       18:{
-        text:`Página 18: Planos Anatômicos\n- Indicação de Plano Transversal (Mediano) e Plano Sagital.`,
+        text:`Página 18: Planos Anatômicos\n- Plano Transversal e Plano Sagital.`,
         links:[
           { label:"🎮 Jogos", url:"https://pinheiro767.github.io/Inicio-anato-2026/", color:"#4caf50" },
           { label:"🧪 Teste", url:"https://pinheiro767.github.io/Inicio-anato-2026/", color:"#b366ff" }
         ]
       },
-      19:{ text:`Página 19: Plano Mediano\n- O plano mediano divide o corpo humano em lados direito e esquerdo.` },
+      19:{ text:`Página 19: Plano Mediano\n- Divide o corpo em lados direito e esquerdo.` },
       20:{ text:`Página 20: Plano Sagital\n- Divide o corpo em duas partes assimétricas.` },
-      21:{ text:`Página 21: Plano Frontal\n- Também chamado de Coronal, divide o corpo em partes anterior e posterior.` },
-      22:{ text:`Página 22: Plano Transverso\n- Também chamado de Axial, divide o corpo em partes superior e inferior.` },
-      23:{ text:`Página 23: Eixos do Corpo Humano\n- Linhas imaginárias que atravessam planos paralelos em torno das quais ocorrem os movimentos.` },
-      24:{ text:`Página 24: Plano Frontal x Eixo Sagital\n- Movimentos de Abdução e Adução ocorrem em planos frontais em torno de um eixo ântero-posterior.` },
-      25:{ text:`Página 25: Plano Sagital x Eixo Látero-lateral\n- Os movimentos de Flexão e Extensão geralmente ocorrem em planos sagitais em torno de um eixo transverso.` },
-      26:{ text:`Página 26: Plano Transversal x Eixo Longitudinal\n- Os movimentos de Rotação ocorrem no plano transversal e acontecem em torno do eixo longitudinal.` },
-      27:{ text:`Página 27: Descrição de Movimentos\n- Flexão: Diminui o ângulo entre segmentos.\n- Abdução e Adução: Afasta e aproxima parte do corpo à linha média.\n- Rotação: Gira uma parte em torno de um eixo.\n- Circundação: Movimento circular que combina flexão, abdução e adução.` },
-      28:{ text:`Página 28: Importância dos Movimentos\n- Compreender esses movimentos é fundamental para profissionais da saúde e do esporte para mobilidade e prevenção de lesões.` },
-      29:{ text:`Página 29: Cortes Anatômicos\n- O principal uso dos planos é descrever cortes:\n  • Corte Longitudinal\n  • Corte Oblíquo\n  • Corte Transverso` },
-      30:{ text:`Página 30: Revisão de Planos\n- Ilustrações dos planos Sagital e Transversal.` },
-      31:{ text:`Página 31: Terminologia Anatômica\n- Início da seção sobre Terminologia Anatômica e Posição Anatômica.` },
-      32:{ text:`Página 32: Termos de Relação e Comparação (Parte 1)\n- Superior (Cranial): Mais próximo da cabeça.\n- Inferior (Caudal): Mais próximo dos pés.\n- Anterior (Ventral): Mais próximo da frente do corpo.\n- Posterior (Dorsal): Mais próximo das costas.\n- Palmar vs Dorsal (mão) e Plantar vs Dorsal (pé).\n- Superficial, Intermediário e Profundo.\n- Medial: Mais próximo do plano mediano.\n- Lateral: Mais distante do plano mediano.` },
-      33:{ text:`Página 33: Termos de Relação e Comparação (Parte 2)\n- Diagramas exemplificando: Superficial, Intermédio, Profundo, Distal, Medial, Proximal e Lateral.` },
-      34:{ text:`Página 34: Conceito: Normal\n- Refere-se às características anatômicas presentes na maioria da população, consideradas mais frequentes.` },
-      35:{ text:`Página 35: Conceito: Anomalia\n- Alteração morfológica que difere do normal e traz prejuízo à função, mas é compatível com a vida (ex: polidactilia).` },
-      36:{ text:`Página 36: Conceito: Monstruosidade\n- Alteração morfológica grave que compromete estruturas vitais e gera prejuízo funcional severo, sendo incompatível com a vida.\n- Tabela comparativa:\n  • Normal: Compatível com a vida; Sem prejuízo funcional.\n  • Anomalia: Compatível com a vida; Pode haver prejuízo funcional.\n  • Monstruosidade: Não compatível com a vida; Prejuízo funcional grave.` },
-      37:{ text:`Página 37: Freak Shows Históricos\n- Cartaz do século XIX sobre Julia Pastrana e o "Double-Bodied Boy".\n- Menciona a exposição de irmãos siameses e meninos parasitas em "freak shows".` }
+      21:{ text:`Página 21: Plano Frontal\n- Também chamado de Coronal.` },
+      22:{ text:`Página 22: Plano Transverso\n- Também chamado de Axial.` },
+      23:{ text:`Página 23: Eixos do Corpo Humano\n- Linhas imaginárias que atravessam planos.` },
+      24:{ text:`Página 24: Plano Frontal x Eixo Sagital\n- Movimentos de Abdução e Adução.` },
+      25:{ text:`Página 25: Plano Sagital x Eixo Látero-lateral\n- Flexão e Extensão.` },
+      26:{ text:`Página 26: Plano Transversal x Eixo Longitudinal\n- Movimentos de Rotação.` },
+      27:{ text:`Página 27: Descrição de Movimentos\n- Flexão, Abdução, Adução, Rotação e Circundação.` },
+      28:{ text:`Página 28: Importância dos Movimentos\n- Fundamental para mobilidade e prevenção de lesões.` },
+      29:{ text:`Página 29: Cortes Anatômicos\n- Longitudinal, Oblíquo e Transverso.` },
+      30:{ text:`Página 30: Revisão de Planos\n- Ilustrações dos planos.` },
+      31:{ text:`Página 31: Terminologia Anatômica\n- Seção sobre terminologia.` },
+      32:{ text:`Página 32: Termos de Relação e Comparação (Parte 1)\n- Superior, Inferior, Anterior, Posterior.` },
+      33:{ text:`Página 33: Termos de Relação e Comparação (Parte 2)\n- Superficial, Distal, Medial, Proximal e Lateral.` },
+      34:{ text:`Página 34: Conceito: Normal\n- Características anatômicas frequentes.` },
+      35:{ text:`Página 35: Conceito: Anomalia\n- Diferente do normal com prejuízo à função.` },
+      36:{ text:`Página 36: Conceito: Monstruosidade\n- Incompatível com a vida.` },
+      37:{ text:`Página 37: Freak Shows Históricos\n- Cartaz do século XIX sobre Julia Pastrana.` }
     };
 
     function updateUI() {
@@ -667,40 +644,22 @@
 
       const s = slideData[currentSlide];
       const linkBtn = document.getElementById('link-btn');
-      if (s && s.links && s.links.length) {
-        linkBtn.style.display = 'block';
-      } else {
-        linkBtn.style.display = 'none';
-      }
+      linkBtn.style.display = (s && s.links && s.links.length) ? 'block' : 'none';
 
       const container = document.getElementById('slide-container');
-
-      let html = `
-        <img src="assets/slide${currentSlide}.jpg"
-             class="slide-image"
-             alt="Slide ${currentSlide}"
-             loading="lazy"
-             onerror="this.parentElement.innerHTML='<div class=\\'placeholder\\'><div style=\\'font-size:2rem;margin-bottom:1rem;\\'>📊</div><div>Slide ${currentSlide}</div></div>'">
-      `;
+      let html = `<img src="assets/slide${currentSlide}.jpg" class="slide-image" alt="Slide ${currentSlide}" onerror="this.parentElement.innerHTML='<div class=\\'placeholder\\'><div style=\\'font-size:2rem;margin-bottom:1rem;\\'>📊</div><div>Slide ${currentSlide}</div></div>'">`;
 
       if (s && s.links && s.links.length) {
         html += `<div class="link-buttons">`;
         s.links.forEach(link => {
-          html += `
-            <a href="${link.url}" target="_blank" rel="noopener noreferrer"
-               style="background:${link.color};">
-              ${link.label}
-            </a>
-          `;
+          html += `<a href="${link.url}" target="_blank" rel="noopener noreferrer" style="background:${link.color};">${link.label}</a>`;
         });
         html += `</div>`;
       }
-
       container.innerHTML = html;
 
       document.getElementById('prev-btn').disabled = currentSlide === 1;
       document.getElementById('next-btn').disabled = currentSlide === totalSlides;
-
       if (document.getElementById('notes-panel').classList.contains('active')) loadNotes();
       updateNotesIndicator();
     }
@@ -708,145 +667,53 @@
     function updateNotesIndicator() {
       const indicator = document.getElementById('notes-indicator');
       const notes = localStorage.getItem(`note-${currentSlide}`);
-      if (notes && notes.trim()) {
-        indicator.classList.add('active');
-      } else {
-        indicator.classList.remove('active');
-      }
+      indicator.classList.toggle('active', !!(notes && notes.trim()));
     }
 
     function nextSlide() { if (currentSlide < totalSlides) { currentSlide++; updateUI(); } }
     function previousSlide() { if (currentSlide > 1) { currentSlide--; updateUI(); } }
-
-    function toggleNotes() {
+    function toggleNotes() { 
       document.getElementById('notes-panel').classList.toggle('active');
       if (document.getElementById('notes-panel').classList.contains('active')) loadNotes();
     }
-
     function openNotes(open) {
-      const panel = document.getElementById('notes-panel');
-      if (open) panel.classList.add('active');
-      else panel.classList.remove('active');
-      if (panel.classList.contains('active')) loadNotes();
+      document.getElementById('notes-panel').classList.toggle('active', open);
+      if (open) loadNotes();
     }
-
-    function loadNotes() {
-      document.getElementById('notes-text').value = localStorage.getItem(`note-${currentSlide}`) || "";
-      updateNotesIndicator();
-    }
-
-    function saveNotes() {
-      localStorage.setItem(`note-${currentSlide}`, document.getElementById('notes-text').value);
-      updateNotesIndicator();
-    }
-
+    function loadNotes() { document.getElementById('notes-text').value = localStorage.getItem(`note-${currentSlide}`) || ""; }
+    function saveNotes() { localStorage.setItem(`note-${currentSlide}`, document.getElementById('notes-text').value); updateNotesIndicator(); }
     function extractText() {
-      const info = slideData[currentSlide]?.text || `Conteúdo do Slide ${currentSlide}`;
+      const info = slideData[currentSlide]?.text || `Slide ${currentSlide}`;
       const ta = document.getElementById('notes-text');
       ta.value += (ta.value ? "\n\n" : "") + `--- SLIDE ${currentSlide} ---\n` + info;
       saveNotes();
     }
-
-    function clearNotes() {
-      const confirmed = confirm("Tem certeza que deseja limpar as notas deste slide?");
-      if (confirmed) {
-        document.getElementById('notes-text').value = "";
-        localStorage.removeItem(`note-${currentSlide}`);
-        updateNotesIndicator();
-      }
-    }
+    function clearNotes() { if (confirm("Limpar notas?")) { document.getElementById('notes-text').value = ""; localStorage.removeItem(`note-${currentSlide}`); updateNotesIndicator(); } }
 
     function downloadPDF() {
       const { jsPDF } = window.jspdf;
       const txt = document.getElementById('notes-text').value;
-
-      if (!txt.trim()) {
-        alert("Notas vazias! Escreva algo antes de baixar.");
-        return;
-      }
-
-      const doc = new jsPDF({ unit: "mm", format: "a4" });
-      const margin = 12;
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
-      const maxWidth = pageWidth - margin * 2;
-      const lineHeight = 6;
-
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(14);
-      doc.text(`Aula de Anatomia — Slide ${currentSlide}`, margin, 16);
-
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(11);
-
-      const lines = doc.splitTextToSize(txt, maxWidth);
-
-      let y = 26;
-      for (let i = 0; i < lines.length; i++) {
-        if (y > pageHeight - margin) {
-          doc.addPage();
-          y = margin;
-        }
-        doc.text(lines[i], margin, y);
-        y += lineHeight;
-      }
-
-      doc.save(`Aula_Anatomia_Slide_${currentSlide}.pdf`);
+      if (!txt.trim()) { alert("Notas vazias!"); return; }
+      const doc = new jsPDF();
+      doc.text(txt, 10, 10);
+      doc.save(`Slide_${currentSlide}.pdf`);
     }
 
     function toggleFullscreen() {
-      const doc = document.documentElement;
-      if (!document.fullscreenElement) {
-        doc.requestFullscreen().catch(err => console.log("Fullscreen error:", err.message));
-      } else {
-        document.exitFullscreen().catch(err => console.log("Exit fullscreen error:", err.message));
-      }
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
     }
 
     document.addEventListener('keydown', (e) => {
       if (e.key === "ArrowRight") nextSlide();
       if (e.key === "ArrowLeft") previousSlide();
-      if (e.key === "Escape") {
-        const p = document.getElementById('notes-panel');
-        if (p.classList.contains('active')) p.classList.remove('active');
-      }
-
-      if (/^[0-9]$/.test(e.key)) {
-        let slideNum = parseInt(e.key, 10);
-        if (e.key === "0") slideNum = 10;
-        goToSlide(slideNum);
-      }
-
-      if (e.key.toLowerCase() === "v" && !e.ctrlKey && !e.metaKey) {
-        e.preventDefault();
-        toggleVoice();
-      }
-
-      if (e.key.toLowerCase() === "l" && !e.ctrlKey && !e.metaKey) {
-        e.preventDefault();
-        openCurrentLink();
-      }
-
-      if (e.key.toLowerCase() === "n" && !e.ctrlKey && !e.metaKey) {
-        e.preventDefault();
-        toggleNotes();
-      }
-
-      if (e.key.toLowerCase() === "f" && !e.ctrlKey && !e.metaKey) {
-        e.preventDefault();
-        toggleFullscreen();
-      }
+      if (e.key.toLowerCase() === "v") toggleVoice();
     });
 
     document.getElementById('notes-text').addEventListener('input', saveNotes);
-
-    function goToSlide(n) {
-      const clamped = Math.min(totalSlides, Math.max(1, Number(n)));
-      currentSlide = clamped;
-      updateUI();
-    }
+    function goToSlide(n) { currentSlide = Math.min(totalSlides, Math.max(1, Number(n))); updateUI(); }
 
     updateUI();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d607f35626b6d6a',t:'MTc3MjQ1NTUwOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ </body>
 </html>
